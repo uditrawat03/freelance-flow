@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
@@ -11,11 +12,7 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $clients = [
-            ['name' => 'Acme Corp',         'email' => 'hello@acme.com'],
-            ['name' => 'Stark Industries',  'email' => 'tony@stark.com'],
-            ['name' => 'Wayne Enterprises', 'email' => 'bruce@wayne.com'],
-        ];
+        $clients = Client::all();
 
         return view('clients.index', compact('clients'));
     }
