@@ -5,31 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'FreelanceFlow')</title>
 
-    {{-- Inter font --}}
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" rel="stylesheet" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    {{-- Required for Flux dark mode support --}}
     @fluxAppearance
 </head>
-<body class="min-h-screen font-sans antialiased">
+<body class="min-h-screen font-sans antialiased flex items-center justify-center">
 
-    @include('partials.navbar')
+    {{ $slot }}
 
-    <div class="flex">
-        @auth
-            @include('partials.sidebar')
-        @endauth
-
-
-        <main class="flex-1 p-6">
-            @yield('content')
-        </main>
-    </div>
-
-    {{-- Required: Flux JS + Livewire assets --}}
     @fluxScripts
 </body>
 </html>

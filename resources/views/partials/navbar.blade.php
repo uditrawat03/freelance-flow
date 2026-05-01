@@ -1,9 +1,23 @@
-<nav class="flex items-center justify-between bg-white w-full h-16 py-2 px-4 shadow-2xl fixed top-0 left-0 right-0 z-9999">
-    <a href="/" class="text-2xl font-bold">FreelanceFlow</a>
+<nav class="bg-black  px-6 py-3 flex items-center justify-between">
+    <a href="{{ route('dashboard') }}" class="text-lg font-bold">
+        FreelanceFlow
+    </a>
 
     <div class="flex items-center gap-4">
-        <a href="{{ route('clients.index') }}" class="hover:text-blue-600">Clients</a>
-        <a href="#">Projects</a>
-        <a href="#">Invoices</a>
+        @auth
+            <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="text-sm text-gray-500 hover:text-red-500 transition">
+                    Log out
+                </button>
+            </form>
+        @endauth
+
+        @guest
+            <a href="{{ route('login') }}" class="text-sm text-white hover:text-blue-600">Log in</a>
+            <a href="{{ route('register') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Register</a>
+        @endguest
     </div>
 </nav>
