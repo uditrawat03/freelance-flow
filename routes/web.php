@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
+use App\Livewire\Clients\Create as CreateClient;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,5 +29,14 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
 
-Route::resource('clients', ClientController::class)
+// Create client — Livewire full-page component
+Route::get('/clients/create', CreateClient::class)
+    ->name('clients.create')
     ->middleware('auth');
+
+// Clients list and detail — still handled by the controller
+Route::resource('clients', ClientController::class)
+    ->only(['index', 'show'])
+    ->middleware('auth');
+
+

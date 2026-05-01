@@ -12,7 +12,7 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $clients = Client::all();
+        $clients = Client::latest()->get();
 
         return view('clients.index', compact('clients'));
     }

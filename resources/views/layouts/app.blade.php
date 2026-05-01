@@ -25,7 +25,11 @@
 
 
         <main class="flex-1 p-6">
-            @yield('content')
+            @hasSection('content')
+                @yield('content')
+            @else
+                {{ $slot ?? '' }}
+            @endif
         </main>
     </div>
 
