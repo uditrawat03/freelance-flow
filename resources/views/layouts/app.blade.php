@@ -18,7 +18,7 @@
 
     @include('partials.navbar')
 
-    <div class="flex">
+    <div class="flex mt-16">
         @auth
             @include('partials.sidebar')
         @endauth

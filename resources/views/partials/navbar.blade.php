@@ -1,4 +1,4 @@
-<nav class="bg-black  px-6 py-3 flex items-center justify-between">
+<nav class="bg-black  px-6 py-3 flex items-center justify-between fixed top-0 left-0 right-0">
     <a href="{{ route('dashboard') }}" class="text-lg font-bold">
         FreelanceFlow
     </a>

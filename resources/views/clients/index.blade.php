@@ -4,7 +4,7 @@
 
 @section('content')
 
-    {{-- Flash success message --}}
+    {{-- Flash message --}}
     @if (session('success'))
         <div class="mb-4 flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
             <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -18,7 +18,7 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-semibold">Clients</h1>
-            <p class="mt-1 text-sm text-gray-500">Manage all your clients in one place.</p>
+            <p class="mt-1 text-sm text-gray-500">{{ $clients->count() }} {{ Str::plural('client', $clients->count()) }}</p>
         </div>
         <a
             href="{{ route('clients.create') }}"
@@ -31,6 +31,8 @@
     {{-- Client list --}}
     @forelse ($clients as $client)
         <div class="bg-white border border-gray-200 rounded-lg px-5 py-4 mb-3 flex items-center justify-between">
+
+            {{-- Client info --}}
             <div>
                 <p class="font-medium text-gray-900">{{ $client->name }}</p>
                 <p class="text-sm text-gray-500">{{ $client->email }}</p>
@@ -38,7 +40,10 @@
                     <p class="text-xs text-gray-400 mt-0.5">{{ $client->company }}</p>
                 @endif
             </div>
-            <div class="flex items-center gap-3">
+
+            {{-- Right side: badge + actions --}}
+            <div class="flex items-center gap-4">
+
                 {{-- Status badge --}}
                 @php
                     $badgeClass = match($client->status) {
@@ -51,7 +56,19 @@
                 <span class="text-xs font-medium px-2.5 py-1 rounded-full {{ $badgeClass }}">
                     {{ ucfirst($client->status) }}
                 </span>
+
+                {{-- Action buttons --}}
+                <div class="flex items-center gap-2">
+                    <a
+                        href="{{ route('clients.edit', $client) }}"
+                        class="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                    >
+                        Edit
+                    </a>
+                </div>
+
             </div>
+
         </div>
     @empty
         <div class="text-center py-16">
