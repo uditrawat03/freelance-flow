@@ -14,10 +14,18 @@ class Edit extends Component
 {
     public Client $client;
 
-    #[Rule('required|string|max:255')]
+    #[Rule('required|string|max:255', messages: [
+        'required' => 'The client name cannot be empty.',
+        'min'      => 'The name must be at least 2 characters.',
+        'max'      => 'The name is too long — maximum 255 characters.',
+    ])]
     public string $name = '';
 
-    #[Rule('required|email|max:255')]
+    #[Rule('required|email|max:255', messages: [
+        'required' => 'The email address cannot be empty.',
+        'email'    => 'The email address is not valid.',
+        'max'      => 'The email address is too long — maximum 255 characters.',
+    ])]
     public string $email = '';
 
     #[Rule('nullable|string|max:20')]
@@ -71,6 +79,7 @@ class Edit extends Component
 
     public function confirmDelete(): void
     {
+        $this->resetValidation(); // Clear any validation errors before showing the confirmation
         $this->confirmingDelete = true;
     }
 
