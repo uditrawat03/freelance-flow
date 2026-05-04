@@ -12,23 +12,13 @@ use Livewire\Component;
 #[Title('Add Client — FreelanceFlow')]
 class Create extends Component
 {
-    #[Rule(
-        rule: 'required|string|min:2|max:255',
-        messages: [
-            'required' => 'The client name cannot be empty.',
-            'min'      => 'The name must be at least 2 characters.',
-        ]
-    )]
+    #[Rule('required', message: "The name is required")]
+    #[Rule('string', message: "The name must be a valid string.")]
+    #[Rule('max:255', message: "The name is too long — maximum 255 characters.")]
     public string $name = '';
 
-    #[Rule(
-        rule: 'required|email|max:255|unique:clients,email',
-        messages: [
-            'required' => 'An email address is required.',
-            'email'    => 'That does not look like a valid email address.',
-            'unique'   => 'A client with this email already exists in FreelanceFlow.',
-        ]
-    )]
+    #[Rule('required', message: "The email is required")]
+    #[Rule('email', message: "The email must be a valid email address.")]
     public string $email = '';
 
     #[Rule('nullable|string|max:20')]
@@ -42,7 +32,7 @@ class Create extends Component
 
     #[Rule(
         rule: 'required|in:active,inactive,lead',
-        messages: ['required' => 'Please select a client status.']
+        message: ['required' => 'Please select a client status.']
     )]
     public string $status = 'active';
 

@@ -1,20 +1,13 @@
 <div>
     {{-- Page header --}}
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Add Client</h1>
-            <p class="mt-1 text-sm text-gray-500">Fill in the details to add a new client to FreelanceFlow.</p>
-        </div>
-        <a
-            href="{{ route('clients.index') }}"
-            class="text-sm text-gray-500 hover:text-gray-700"
-        >
+    <x-page-header title="Add Client" subtitle="Fill in the details to add a new client.">
+        <a href="{{ route('clients.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
             ← Back to clients
         </a>
-    </div>
+    </x-page-header>
 
     {{-- Form card --}}
-    <flux:card class="max-w-2xl p-6 space-y-5">
+    <x-form-card>
 
         {{-- Name --}}
         <flux:field>
@@ -102,5 +95,5 @@
             </a>
         </div>
 
-    </flux:card>
+    </x-form-card>
 </div>

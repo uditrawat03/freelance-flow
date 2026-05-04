@@ -25,6 +25,8 @@
 
 
         <main class="flex-1 p-6">
+            {{-- Flash message --}}
+            <x-flash-message />
             @hasSection('content')
                 @yield('content')
             @else

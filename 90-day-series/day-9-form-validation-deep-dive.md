@@ -70,7 +70,7 @@ Pass an array of messages keyed by rule name:
 ```php
 #[Rule(
     rule: 'required|string|min:2|max:255',
-    messages: [
+    message: [
         'required' => 'The client name cannot be empty.',
         'min'      => 'The name must be at least 2 characters.',
         'max'      => 'The name is too long — maximum 255 characters.',
@@ -80,7 +80,7 @@ public string $name = '';
 
 #[Rule(
     rule: 'required|email|max:255|unique:clients,email',
-    messages: [
+    message: [
         'required' => 'An email address is required.',
         'email'    => 'That does not look like a valid email address.',
         'unique'   => 'A client with this email already exists in FreelanceFlow.',
@@ -90,7 +90,7 @@ public string $email = '';
 
 #[Rule(
     rule: 'required|in:active,inactive,lead',
-    messages: [
+    message: [
         'required' => 'Please select a client status.',
         'in'       => 'Status must be active, inactive, or lead.',
     ]
@@ -142,7 +142,7 @@ class Create extends Component
 {
     #[Rule(
         rule: 'required|string|min:2|max:255',
-        messages: [
+        message: [
             'required' => 'The client name cannot be empty.',
             'min'      => 'The name must be at least 2 characters.',
         ]
@@ -151,7 +151,7 @@ class Create extends Component
 
     #[Rule(
         rule: 'required|email|max:255|unique:clients,email',
-        messages: [
+        message: [
             'required' => 'An email address is required.',
             'email'    => 'That does not look like a valid email address.',
             'unique'   => 'A client with this email already exists in FreelanceFlow.',
@@ -170,7 +170,7 @@ class Create extends Component
 
     #[Rule(
         rule: 'required|in:active,inactive,lead',
-        messages: ['required' => 'Please select a client status.']
+        message: ['required' => 'Please select a client status.']
     )]
     public string $status = 'active';
 
@@ -312,7 +312,7 @@ use App\Rules\BusinessEmail;
 
 #[Rule(
     rule: ['required', 'email', 'max:255', 'unique:clients,email', new BusinessEmail],
-    messages: [
+    message: [
         'required' => 'An email address is required.',
         'email'    => 'That does not look like a valid email address.',
         'unique'   => 'A client with this email already exists.',

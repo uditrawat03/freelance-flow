@@ -14,18 +14,13 @@ class Edit extends Component
 {
     public Client $client;
 
-    #[Rule('required|string|max:255', messages: [
-        'required' => 'The client name cannot be empty.',
-        'min'      => 'The name must be at least 2 characters.',
-        'max'      => 'The name is too long — maximum 255 characters.',
-    ])]
+    #[Rule('required', message: "The name is required")]
+    #[Rule('string', message: "The name must be a valid string.")]
+    #[Rule('max:255', message: "The name is too long — maximum 255 characters.")]
     public string $name = '';
 
-    #[Rule('required|email|max:255', messages: [
-        'required' => 'The email address cannot be empty.',
-        'email'    => 'The email address is not valid.',
-        'max'      => 'The email address is too long — maximum 255 characters.',
-    ])]
+    #[Rule('required', message: "The email is required")]
+    #[Rule('email', message: "The email must be a valid email address.")]
     public string $email = '';
 
     #[Rule('nullable|string|max:20')]

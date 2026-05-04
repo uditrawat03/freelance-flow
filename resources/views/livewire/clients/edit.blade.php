@@ -1,20 +1,16 @@
 <div>
     {{-- Page header --}}
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold">Edit Client</h1>
-            <p class="mt-1 text-sm text-gray-500">Update {{ $client->name }}'s details.</p>
-        </div>
-        <a
-            href="{{ route('clients.index') }}"
-            class="text-sm text-gray-500 hover:text-gray-700"
-        >
+    <x-page-header
+        title="Edit Client"
+        subtitle="Update {{ $client->name }}'s details."
+    >
+        <a href="{{ route('clients.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
             ← Back to clients
         </a>
-    </div>
+    </x-page-header>
 
     {{-- Edit form --}}
-    <flux:card class="max-w-2xl p-6 space-y-5">
+    <x-form-card>
 
         <flux:field>
             <flux:label>Full name <span class="text-red-500">*</span></flux:label>
@@ -106,7 +102,7 @@
             </flux:button>
         </div>
 
-    </flux:card>
+    </x-form-card>
 
     {{-- Delete confirmation modal --}}
     <flux:modal wire:model="confirmingDelete" class="max-w-sm">
