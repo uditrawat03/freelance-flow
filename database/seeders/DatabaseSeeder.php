@@ -18,8 +18,14 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Demo User',
+            'email' => 'demo@freelanceflow.test',
+        ]);
+
+         $this->call([
+            ClientSeeder::class,
+            // ProjectSeeder::class,   - we add these in Phase 2
+            // InvoiceSeeder::class,
         ]);
     }
 }
