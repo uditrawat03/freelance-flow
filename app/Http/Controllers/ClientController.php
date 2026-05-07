@@ -12,9 +12,20 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $clients = Client::latest()->get();
+        $status  = request('status'); // null = show all
+        $search  = request('search');
 
-        return view('clients.index', compact('clients'));
+        $clients = Client::query()
+            ->when($status, fn ($q) => $q->status($status))
+            ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('company', 'like', "%{$search}%");
+            }))
+            ->latest()
+            ->get();
+
+        return view('clients.index', compact('clients', 'status', 'search'));
     }
 
     /**
