@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Clients;
 
+use App\Livewire\Concerns\WithNotifications;
 use App\Models\Client;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
@@ -12,6 +13,7 @@ use Livewire\Component;
 #[Title('Edit Client — FreelanceFlow')]
 class Edit extends Component
 {
+    use WithNotifications;
     public Client $client;
 
     #[Rule('required', message: "The name is required")]
@@ -67,9 +69,9 @@ class Edit extends Component
             'status'  => $this->status,
         ]);
 
-        session()->flash('success', 'Client updated successfully.');
+        $this->notifySuccess('Client updated successfully.');
 
-        $this->redirect(route('clients.index'), navigate: true);
+        // $this->redirect(route('clients.index'), navigate: true);
     }
 
     public function confirmDelete(): void

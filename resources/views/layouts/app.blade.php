@@ -35,6 +35,9 @@
         </main>
     </div>
 
+    {{-- Notification toast — listens for dispatch('notify') events --}}
+    <livewire:notification />
+
     {{-- Required: Flux JS + Livewire assets --}}
     @fluxScripts
 </body>
