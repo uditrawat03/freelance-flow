@@ -26,22 +26,18 @@ Route::post('/logout', function () {
 })->middleware('auth')->name('logout');
 
 // Protected routes
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
+// Authenticated routes
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 
-// Create client — Livewire full-page component
-Route::get('/clients/create', CreateClient::class)
-    ->name('clients.create')
-    ->middleware('auth');
+    // Livewire form components
+    Route::get('/clients/create', CreateClient::class)->name('clients.create');
+    Route::get('/clients/{client}/edit', EditClient::class)->name('clients.edit');
 
-Route::get('/clients/{client}/edit', EditClient::class)
-    ->name('clients.edit')
-    ->middleware('auth');
-
-// Clients list and detail — still handled by the controller
-Route::resource('clients', ClientController::class)
-    ->only(['index', 'show'])
-    ->middleware('auth');
+    // Controller handles list and show
+    Route::resource('clients', ClientController::class)->only(['index', 'show']);
+});
 
 
