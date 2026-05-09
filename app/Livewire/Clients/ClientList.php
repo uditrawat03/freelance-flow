@@ -48,14 +48,15 @@ class ClientList extends Component
     public function render()
     {
         $clients = Client::query()
+            ->withCount('projects')  // adds projects_count to each client
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', "%{$this->search}%")
-                      ->orWhere('email', 'like', "%{$this->search}%")
-                      ->orWhere('company', 'like', "%{$this->search}%");
+                        ->orWhere('email', 'like', "%{$this->search}%")
+                        ->orWhere('company', 'like', "%{$this->search}%");
                 });
             })
-            ->when($this->status, fn ($query) => $query->status($this->status))
+            ->when($this->status, fn($query) => $query->status($this->status))
             ->latest()
             ->paginate(10);
 

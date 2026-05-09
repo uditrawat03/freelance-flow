@@ -26,7 +26,7 @@
         <div class="flex items-center gap-2 shrink-0">
             @foreach (['' => 'All', 'active' => 'Active', 'inactive' => 'Inactive', 'lead' => 'Leads'] as $value => $label)
                     <button wire:click="setStatus('{{ $value }}')" class="text-sm px-3 py-1.5 rounded-full border transition-colors
-                                {{ $status === $value
+                                        {{ $status === $value
                 ? 'bg-indigo-600 text-white border-indigo-600'
                 : 'text-gray-600 border-gray-200 hover:border-indigo-300 bg-white' }}">
                         {{ $label }}
@@ -69,15 +69,14 @@
                     </div>
 
                     <div>
-                        <a
-                            href="{{ route('clients.show', $client) }}"
-                            class="font-medium text-gray-900 text-sm hover:text-indigo-600 transition-colors"
-                        >
+                        <a href="{{ route('clients.show', $client) }}"
+                            class="font-medium text-gray-900 text-sm hover:text-indigo-600 transition-colors">
                             {{ $client->display_name }}
                         </a>
                         <p class="text-xs text-gray-500">{{ $client->email }}</p>
                         <p class="text-xs text-gray-400 mt-0.5">
-                            Added {{ $client->created_at->diffForHumans() }}
+                            {{ $client->projects_count }} {{ Str::plural('project', $client->projects_count) }}
+                            · Added {{ $client->created_at->diffForHumans() }}
                         </p>
                     </div>
                 </div>

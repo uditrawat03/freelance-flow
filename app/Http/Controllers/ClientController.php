@@ -36,7 +36,11 @@ class ClientController extends Controller
      */
     public function show(Client $client)
     {
-        $client->load('projects');
+        // $client->load(['projects' => function ($query) {
+        //     $query->with('tags')->latest();
+        // }]);
+
+        $client->load('projects.tags');
 
         return view('clients.show', compact('client'));
     }
