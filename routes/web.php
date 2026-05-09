@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +47,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/projects/{project}/edit', \App\Livewire\Projects\Edit::class)
         ->name('projects.edit');
+
+    Route::get('/attachments/{attachment}/download', [AttachmentController::class, 'download'])
+     ->name('attachments.download');
 
     // Projects — controller for show, Livewire for forms (Day 17)
     Route::resource('projects', ProjectController::class)->only(['show']);

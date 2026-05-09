@@ -8,12 +8,14 @@ use App\Models\Tag;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
 #[Title('New Project — FreelanceFlow')]
 class Create extends Component
 {
+    #[Url(as: 'client')]
     public ?int $client_id = null;
 
     #[Rule('required|exists:clients,id')]
