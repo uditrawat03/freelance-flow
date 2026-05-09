@@ -62,6 +62,16 @@
                         </span>
                     @endif
                 </div>
+                @if ($project->tags->isNotEmpty())
+                    <div class="flex flex-wrap gap-1.5 mt-1.5">
+                        @foreach ($project->tags as $tag)
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full"
+                                style="background-color: {{ $tag->colour }}22; color: {{ $tag->colour }}">
+                                {{ $tag->name }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
             </div>
             <div class="flex items-center gap-4">
                 @if ($project->budget)

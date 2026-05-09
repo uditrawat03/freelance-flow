@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
 
          $this->call([
             ClientSeeder::class,
+            TagSeeder::class
             // ProjectSeeder::class,   - we add these in Phase 2
             // InvoiceSeeder::class,
         ]);
