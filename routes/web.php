@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 use App\Livewire\Auth\Login;
@@ -38,6 +39,16 @@ Route::middleware('auth')->group(function () {
 
     // Controller handles list and show
     Route::resource('clients', ClientController::class)->only(['index', 'show']);
+
+    // Projects — controller for show, Livewire for forms (Day 17)
+    Route::resource('projects', ProjectController::class)->only(['show']);
+
+    // Project create with optional client pre-selection via query string
+    Route::get('/projects/create', \App\Livewire\Projects\Create::class)
+        ->name('projects.create');
+
+    Route::get('/projects/{project}/edit', \App\Livewire\Projects\Edit::class)
+        ->name('projects.edit');
 });
 
 

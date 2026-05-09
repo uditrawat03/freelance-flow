@@ -62,14 +62,19 @@
                 {{-- Avatar + info --}}
                 <div class="flex items-center gap-3">
                     {{-- Initials avatar --}}
-                    <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                    <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
                         <span class="text-xs font-semibold text-indigo-700">
                             {{ $client->initials }}
                         </span>
                     </div>
 
                     <div>
-                        <p class="font-medium text-gray-900 text-sm">{{ $client->display_name }}</p>
+                        <a
+                            href="{{ route('clients.show', $client) }}"
+                            class="font-medium text-gray-900 text-sm hover:text-indigo-600 transition-colors"
+                        >
+                            {{ $client->display_name }}
+                        </a>
                         <p class="text-xs text-gray-500">{{ $client->email }}</p>
                         <p class="text-xs text-gray-400 mt-0.5">
                             Added {{ $client->created_at->diffForHumans() }}
