@@ -32,6 +32,10 @@ class Project extends Model
         'deleted_at' => 'datetime',
     ];
 
+    protected $dispatchesEvents = [
+        'created' => \App\Events\ProjectCreated::class,
+    ];
+
     // Relationship
     public function client(): BelongsTo
     {

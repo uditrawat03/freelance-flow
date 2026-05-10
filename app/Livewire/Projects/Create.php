@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Projects;
 
-use App\Jobs\SendProjectNotification;
 use App\Models\Client;
 use App\Models\Project;
 use App\Models\Tag;
@@ -11,13 +10,15 @@ use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use App\Mail\ProjectCreated;
-use Illuminate\Support\Facades\Mail;
+use Livewire\WithFileUploads;
+
 
 #[Layout('layouts.app')]
 #[Title('New Project — FreelanceFlow')]
 class Create extends Component
 {
+    use WithFileUploads;
+
     #[Url(as: 'client')]
     public ?int $client_id = null;
 
@@ -63,13 +64,6 @@ class Create extends Component
         ]);
 
         $project->tags()->sync($this->selectedTags);
-
-        // Load the client relationship before passing to the Mailable
-        $project->load('client');
-
-        // Dispatch the job to the queue
-        // Project model is automatically serialised for background processing
-        SendProjectNotification::dispatch($project);
 
         session()->flash('success', 'Project created. Client will be notified shortly.');
 
