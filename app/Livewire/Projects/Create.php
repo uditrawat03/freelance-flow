@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Projects;
 
+use App\Jobs\SendProjectNotification;
 use App\Models\Client;
 use App\Models\Project;
 use App\Models\Tag;
@@ -66,11 +67,11 @@ class Create extends Component
         // Load the client relationship before passing to the Mailable
         $project->load('client');
 
-        // Send the notification email to the client
-        Mail::to($project->client->email)
-            ->send(new ProjectCreated($project));
+        // Dispatch the job to the queue
+        // Project model is automatically serialised for background processing
+        SendProjectNotification::dispatch($project);
 
-        session()->flash('success', 'Project created and client notified.');
+        session()->flash('success', 'Project created. Client will be notified shortly.');
 
         $this->redirect(
             route('clients.show', $this->selectedClientId),
