@@ -10,6 +10,8 @@ use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use App\Mail\ProjectCreated;
+use Illuminate\Support\Facades\Mail;
 
 #[Layout('layouts.app')]
 #[Title('New Project — FreelanceFlow')]
@@ -59,10 +61,16 @@ class Create extends Component
             'deadline'    => $this->deadline ?: null,
         ]);
 
-        // Sync tags via the pivot table
         $project->tags()->sync($this->selectedTags);
 
-        session()->flash('success', 'Project created successfully.');
+        // Load the client relationship before passing to the Mailable
+        $project->load('client');
+
+        // Send the notification email to the client
+        Mail::to($project->client->email)
+            ->send(new ProjectCreated($project));
+
+        session()->flash('success', 'Project created and client notified.');
 
         $this->redirect(
             route('clients.show', $this->selectedClientId),

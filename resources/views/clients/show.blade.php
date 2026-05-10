@@ -49,7 +49,7 @@
         </a>
     </div>
 
-    @forelse ($client->projects()->latest()->get() as $project)
+    @forelse ($client->projects as $project)
         <div class="bg-white border border-gray-200 rounded-lg px-5 py-4 mb-2 flex items-center justify-between">
             <div>
                 <p class="font-medium text-gray-900 text-sm">{{ $project->name }}</p>
