@@ -6,6 +6,8 @@ use App\Models\Attachment;
 use App\Models\Client;
 use App\Models\Project;
 use App\Models\Tag;
+use App\Notifications\ProjectStatusChanged;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
@@ -129,6 +131,9 @@ class Edit extends Component
     {
         $this->validate();
 
+        // Capture the status before saving
+        $previousStatus = $this->project->status;
+
         $this->project->update([
             'client_id'   => $this->selectedClientId,
             'name'        => $this->name,
@@ -139,6 +144,17 @@ class Edit extends Component
         ]);
 
         $this->project->tags()->sync($this->selectedTags);
+
+         // Only notify if the status actually changed
+        if ($previousStatus !== $this->status) {
+            $this->project->loadMissing('client');
+            Log::info("Project status changed for Project ID {$this->project->id}: '{$previousStatus}' → '{$this->status}'");
+            // Notify the currently logged-in user
+            // In Phase 4 we extend this to notify the client too
+            auth()->user()->notify(
+                new ProjectStatusChanged($this->project, $previousStatus)
+            );
+        }
 
         session()->flash('success', 'Project updated successfully.');
 

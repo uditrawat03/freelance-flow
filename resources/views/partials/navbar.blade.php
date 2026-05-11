@@ -5,6 +5,8 @@
 
     <div class="flex items-center gap-4">
         @auth
+            <livewire:notification-bell />
+            
             <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>
 
             <form method="POST" action="{{ route('logout') }}">
@@ -19,5 +21,6 @@
             <a href="{{ route('login') }}" class="text-sm text-white hover:text-blue-600">Log in</a>
             <a href="{{ route('register') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Register</a>
         @endguest
+        
     </div>
 </nav>
