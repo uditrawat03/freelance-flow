@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Middleware\ForceJsonResponse;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([ForceJsonResponse::class])->prefix('v1')->group(function () {
+Route::middleware([ForceJsonResponse::class])->prefix('v1')->as('api.')->group(function () {
 
     // --- Public ---
     Route::post('tokens/create', [AuthController::class, 'createToken'])

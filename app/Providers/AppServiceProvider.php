@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\InvoiceService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -15,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(InvoiceService::class);
     }
 
     /**

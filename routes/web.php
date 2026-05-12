@@ -2,13 +2,17 @@
 
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProjectController;
+// use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Clients\Create as CreateClient;
 use App\Livewire\Clients\Edit as EditClient;
+use App\Http\Controllers\PaymentController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -53,6 +57,18 @@ Route::middleware('auth')->group(function () {
 
     // Projects — controller for show, Livewire for forms (Day 17)
     Route::resource('projects', ProjectController::class)->only(['show']);
+
+    Route::prefix('invoices')->name('invoices.')->group(function () {
+        Route::get('/{invoice}/download', [InvoiceController::class, 'download'])->name('download');
+        Route::get('/{invoice}/preview',  [InvoiceController::class, 'preview'])->name('preview');
+        Route::post('/{invoice}/send',    [InvoiceController::class, 'send'])->name('send');
+        Route::post('/{invoice}/paid',    [InvoiceController::class, 'markPaid'])->name('mark-paid');
+    });
+
+    Route::get('/invoices/{invoice}/pay',         [PaymentController::class, 'show'])->name('invoices.pay');
+    Route::get('/invoices/{invoice}/pay/success', [PaymentController::class, 'success'])->name('invoices.pay.success');
+    // Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    //  ->name('stripe.webhook');
 });
 
 
