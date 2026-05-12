@@ -13,10 +13,18 @@ class ProjectController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
+        $request->validate([
+            'per_page'  => 'nullable|integer|min:1|max:100',
+            'status'    => 'nullable|in:draft,active,on_hold,completed,cancelled',
+            'client_id' => 'nullable|exists:clients,id',
+            'overdue'   => 'nullable|boolean',
+        ]);
+
         $projects = Project::query()
             ->with(['client', 'tags'])
-            ->when($request->status, fn($q) => $q->status($request->status))
-            ->when($request->client_id, fn($q) => $q->where('client_id', $request->client_id))
+            ->when($request->status, fn ($q) => $q->status($request->status))
+            ->when($request->client_id, fn ($q) => $q->where('client_id', $request->client_id))
+            ->when($request->boolean('overdue'), fn ($q) => $q->overdue())
             ->latest()
             ->paginate($request->integer('per_page', 15));
 

@@ -24,7 +24,7 @@ class ProjectResource extends JsonResource
             'client' => new ClientResource($this->whenLoaded('client')),
 
             // Include tags only if loaded
-            // 'tags' => TagResource::collection($this->whenLoaded('tags')),
+            'tags' => TagResource::collection($this->whenLoaded('tags')),
 
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),

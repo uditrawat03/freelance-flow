@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ApiResponse;
 use App\Http\Resources\ClientCollection;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
@@ -37,7 +38,7 @@ class ClientController extends Controller
      * POST /api/v1/clients
      * Create a new client.
      */
-    public function store(Request $request): ClientResource
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name'    => 'required|string|max:255',
@@ -50,25 +51,31 @@ class ClientController extends Controller
 
         $client = Client::create($validated);
 
-        return new ClientResource($client);
+        return ApiResponse::created(
+            new ClientResource($client),
+            'Client created successfully.'
+        );
     }
 
     /**
      * GET /api/v1/clients/{client}
      * Show a single client with their projects.
      */
-    public function show(Client $client): ClientResource
+    public function show(Client $client): JsonResponse
     {
         $client->load(['projects' => fn ($q) => $q->with('tags')->latest()]);
 
-        return new ClientResource($client);
+        return ApiResponse::created(
+            new ClientResource($client),
+            'Client created successfully.'
+        );
     }
 
     /**
      * PUT /api/v1/clients/{client}
      * Update a client.
      */
-    public function update(Request $request, Client $client): ClientResource
+    public function update(Request $request, Client $client): JsonResponse
     {
         $validated = $request->validate([
             'name'    => 'sometimes|required|string|max:255',
@@ -81,7 +88,10 @@ class ClientController extends Controller
 
         $client->update($validated);
 
-        return new ClientResource($client->fresh());
+        return ApiResponse::created(
+            new ClientResource($client),
+            'Client created successfully.'
+        );
     }
 
     /**
@@ -92,8 +102,6 @@ class ClientController extends Controller
     {
         $client->delete();
 
-        return response()->json([
-            'message' => 'Client deleted successfully.',
-        ], 200);
+        return ApiResponse::success(null, 'Client deleted successfully.');
     }
 }
