@@ -29,6 +29,8 @@ class Invoice extends Model
         'due_at',
         'paid_at',
         'pdf_path',
+        'stripe_payment_intent_id',
+        'stripe_payment_status',
     ];
 
     protected $casts = [
