@@ -34,9 +34,10 @@ Route::post('/logout', function () {
 // Protected routes
 // Authenticated routes
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+   Route::middleware('auth')->group(function () {
+        Route::get('/dashboard', \App\Livewire\Dashboard::class)->name('dashboard');
+        // ... other routes
+    });
 
     // Livewire form components
     Route::get('/clients/create', CreateClient::class)->name('clients.create');

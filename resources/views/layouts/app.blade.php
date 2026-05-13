@@ -38,6 +38,8 @@
     {{-- Notification toast — listens for dispatch('notify') events --}}
     <livewire:notification />
 
+    @stack('scripts')
+
     {{-- Required: Flux JS + Livewire assets --}}
     @fluxScripts
 </body>

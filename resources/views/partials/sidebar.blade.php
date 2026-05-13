@@ -7,6 +7,6 @@
             <a href="#">Projects</a>
         </li>
         <li class="hover:bg-blue-300 px-2 py-1 rounded-lg hover:text-white"><a href="#">Invoices</a></li>
-        <li class="hover:bg-blue-300 px-2 py-1 rounded-lg hover:text-white"><a href="#">Dashboard</a></li>
+        <li class="hover:bg-blue-300 px-2 py-1 rounded-lg hover:text-white"><a href="{{ route('dashboard') }}">Dashboard</a></li>
     </ul>
 </aside>

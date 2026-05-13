@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Models\Invoice;
+use App\Observers\InvoiceObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,5 +49,7 @@ class AppServiceProvider extends ServiceProvider
                 ? Limit::perMinute(120)->by($request->user()->id)
                 : Limit::perMinute(30)->by($request->ip());
         });
+
+        Invoice::observe(InvoiceObserver::class);
     }
 }
