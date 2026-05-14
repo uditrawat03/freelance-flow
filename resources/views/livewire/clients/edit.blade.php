@@ -93,13 +93,15 @@
             </div>
 
             {{-- Delete trigger --}}
-            <flux:button
-                wire:click="confirmDelete"
-                variant="danger"
-                size="sm"
-            >
-                Delete client
-            </flux:button>
+            @can('delete', $client)
+                <flux:button
+                    wire:click="confirmDelete"
+                    variant="danger"
+                    size="sm"
+                >
+                    Delete client
+                </flux:button>
+            @endcan
         </div>
 
     </x-form-card>

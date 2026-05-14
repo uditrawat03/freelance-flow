@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Services\InvoiceService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use App\Models\Invoice;
 use App\Observers\InvoiceObserver;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,6 +31,24 @@ class AppServiceProvider extends ServiceProvider
         // Throws an exception if a relationship is lazy-loaded (not eager-loaded)
         // Only enable in local/testing environments
         Model::preventLazyLoading(! app()->isProduction());
+
+        // Only allow users who have at least one paid invoice to access the analytics page
+        Gate::define('access-analytics', function (User $user) {
+            return $user->invoices()->paid()->exists();
+        });
+
+        // Only admin users can manage other users (for when we add teams)
+        Gate::define('manage-users', function (User $user) {
+            return $user->role === 'admin';
+        });
+
+        // Before hook — runs before all other authorization checks
+        // Useful for super-admin bypass
+        Gate::before(function (User $user, string $ability) {
+            if ($user->is_super_admin) {
+                return true; // bypass all checks
+            }
+        });
 
         // Standard API rate limit: 60 requests per minute per token/IP
         RateLimiter::for('api', function (Request $request) {

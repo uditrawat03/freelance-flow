@@ -3,15 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $this->authorize('viewAny', Client::class);
+
         return view('clients.index');
     }
 
@@ -36,12 +41,9 @@ class ClientController extends Controller
      */
     public function show(Client $client)
     {
-        // $client->load(['projects' => function ($query) {
-        //     $query->with('tags')->latest();
-        // }]);
+        $this->authorize('view', $client);
 
         $client->load('projects.tags');
-
         return view('clients.show', compact('client'));
     }
 

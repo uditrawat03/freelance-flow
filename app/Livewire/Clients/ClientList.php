@@ -6,6 +6,7 @@ use App\Models\Client;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Gate;
 
 class ClientList extends Component
 {
@@ -19,6 +20,11 @@ class ClientList extends Component
 
     #[Url(history: true)]
     public string $status = '';
+
+    public function mount(): void
+    {
+        Gate::authorize('viewAny', Client::class);
+    }
 
     // Reset pagination to page 1 whenever search changes
     public function updatedSearch(): void

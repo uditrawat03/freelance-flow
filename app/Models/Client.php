@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\OwnedByUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,8 +14,20 @@ class Client extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new OwnedByUser);
+
+        // Auto-assign user_id on creation
+        static::creating(function (Client $client) {
+            if (auth()->check() && ! $client->user_id) {
+                $client->user_id = auth()->id();
+            }
+        });
+    }
+
     protected $fillable = [
-        'name', 'email', 'phone', 'company', 'notes', 'status',
+        'user_id', 'name', 'email', 'phone', 'company', 'notes', 'status',
     ];
 
     protected $casts = [

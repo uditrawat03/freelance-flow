@@ -84,10 +84,12 @@
                 {{-- Right: badge + edit --}}
                 <div class="flex items-center gap-4">
                     <x-client-status :status="$client->status" />
-                    <a href="{{ route('clients.edit', $client) }}"
-                        class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-                        Edit
-                    </a>
+                    @can('update', $client)
+                        <a href="{{ route('clients.edit', $client) }}" class="text-sm text-indigo-600">
+                            Edit
+                        </a>
+                    @endcan
+                    
                 </div>
 
             </div>

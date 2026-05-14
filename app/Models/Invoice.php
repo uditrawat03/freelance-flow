@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\OwnedByUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,20 @@ class Invoice extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new OwnedByUser);
+
+        // Auto-assign user_id on creation
+        static::creating(function (Invoice $invoice) {
+            if (auth()->check() && ! $invoice->user_id) {
+                $invoice->user_id = auth()->id();
+            }
+        });
+    }
+
     protected $fillable = [
+        'user_id',
         'client_id',
         'project_id',
         'number',

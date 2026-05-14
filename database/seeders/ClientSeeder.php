@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Client;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,20 +15,34 @@ class ClientSeeder extends Seeder
         // Wipe existing clients before seeding
         Client::truncate();
 
-        $activeClients = Client::factory()->count(30)->active()->create();
-        $inactiveClients = Client::factory()->count(10)->inactive()->create();
-        $leadClients = Client::factory()->count(10)->lead()->create();
+        $user = User::first();
+
+        $activeClients = Client::factory()->count(30)->active()->create([
+            'user_id' => $user->id,
+        ]);
+        $inactiveClients = Client::factory()->count(10)->inactive()->create([
+            'user_id' => $user->id,
+        ]);
+        $leadClients = Client::factory()->count(10)->lead()->create([
+            'user_id' => $user->id,
+        ]);
 
          // Seed projects for active clients only
         // Each active client gets 1–4 projects
-        $activeClients->each(function (Client $client) {
+        $activeClients->each(function (Client $client) use ($user) {
             $count = fake()->numberBetween(1, 4);
-            Project::factory()->count($count)->create(['client_id' => $client->id]);
+            Project::factory()->count($count)->create([
+                'client_id' => $client->id,
+                'user_id' => $user->id,
+            ]);
         });
 
         // A few completed projects for some inactive clients
-        $inactiveClients->take(5)->each(function (Client $client) {
-            Project::factory()->count(2)->completed()->create(['client_id' => $client->id]);
+        $inactiveClients->take(5)->each(function (Client $client) use ($user) {
+            Project::factory()->count(2)->completed()->create([
+                'client_id' => $client->id,
+                'user_id' => $user->id,
+            ]);
         });
 
 

@@ -8,6 +8,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Illuminate\Support\Facades\Gate;
 
 #[Layout('layouts.app')]
 #[Title('Edit Client — FreelanceFlow')]
@@ -42,6 +43,7 @@ class Edit extends Component
 
     public function mount(Client $client): void
     {
+        Gate::authorize('update', $client);
         // Route model binding passes the Client instance automatically
         // We fill the component properties from the model
         $this->client  = $client;
