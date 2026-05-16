@@ -65,4 +65,10 @@ class InvoiceController extends Controller
 
         return redirect()->back()->with('success', 'Invoice marked as paid.');
     }
+
+    public function destroy(Invoice $invoice)
+    {
+        abort_unless(auth()->user()->can('delete invoices'), 403);
+        $invoice->delete();
+    }
 }

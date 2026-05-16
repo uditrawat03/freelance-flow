@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
          $this->call([
+            RoleAndPermissionSeeder::class,
             ClientSeeder::class,
             TagSeeder::class
             // ProjectSeeder::class,   - we add these in Phase 2
