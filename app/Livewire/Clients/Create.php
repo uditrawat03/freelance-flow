@@ -3,6 +3,7 @@
 namespace App\Livewire\Clients;
 
 use App\Models\Client;
+use App\Services\ClientService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
@@ -47,17 +48,11 @@ class Create extends Component
         $this->validateOnly('email');
     }
 
-    public function save(): void
+    public function save(ClientService $clientService): void
     {
         $this->validate();
 
-        // Cross-field: if status is 'lead', phone is required
-        if ($this->status === 'lead' && empty($this->phone)) {
-            $this->addError('phone', 'A phone number is required for leads.');
-            return;
-        }
-
-        Client::create([
+        $client = $clientService->create([
             'name'    => $this->name,
             'email'   => $this->email,
             'phone'   => $this->phone,
@@ -66,8 +61,9 @@ class Create extends Component
             'status'  => $this->status,
         ]);
 
-        session()->flash('success', 'Client added successfully.');
+        $clientService->bustCache();
 
+        session()->flash('success', 'Client added successfully.');
         $this->redirect(route('clients.index'), navigate: true);
     }
 

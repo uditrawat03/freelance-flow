@@ -3,6 +3,7 @@
 namespace App\Livewire\Clients;
 
 use App\Models\Client;
+use App\Services\ClientService;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -51,20 +52,13 @@ class ClientList extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(ClientService $clientService)
     {
-        $clients = Client::query()
-            ->withCount('projects')  // adds projects_count to each client
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('name', 'like', "%{$this->search}%")
-                        ->orWhere('email', 'like', "%{$this->search}%")
-                        ->orWhere('company', 'like', "%{$this->search}%");
-                });
-            })
-            ->when($this->status, fn($query) => $query->status($this->status))
-            ->latest()
-            ->paginate(10);
+        $clients = $clientService->list(
+            search: $this->search,
+            status: $this->status,
+            perPage: 10,
+        );
 
         return view('livewire.clients.client-list', [
             'clients' => $clients,

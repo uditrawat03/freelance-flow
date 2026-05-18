@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\BelongsToWorkspace;
 use App\Models\Scopes\OwnedByUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -16,14 +17,16 @@ class Project extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected static function booted(): void
+     protected static function booted(): void
     {
-        static::addGlobalScope(new OwnedByUser);
+        // static::addGlobalScope(new OwnedByUser);
+        static::addGlobalScope(new BelongsToWorkspace);
 
         // Auto-assign user_id on creation
-        static::creating(function (Project $project) {
-            if (auth()->check() && ! $project->user_id) {
-                $project->user_id = auth()->id();
+        static::creating(function (self $model) {
+            if (auth()->check() && ! $model->workspace_id) {
+                $workspace = auth()->user()->currentWorkspace();
+                $model->workspace_id = $workspace?->id;
             }
         });
     }

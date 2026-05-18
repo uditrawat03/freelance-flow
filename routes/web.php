@@ -13,6 +13,8 @@ use App\Livewire\Clients\Create as CreateClient;
 use App\Livewire\Clients\Edit as EditClient;
 use App\Livewire\Invoices\Create as CreateInvoice;
 use App\Livewire\Invoices\InvoiceList;
+use App\Livewire\Workspaces\Create as CreateWorkspace;
+
 
 use App\Http\Controllers\PaymentController;
 
@@ -98,6 +100,10 @@ Route::middleware('auth')->group(function () {
     // Route::middleware(['auth', 'role:admin|manager'])->group(function () {
     //     Route::get('/reports', [ReportController::class, 'index']);
     // });
+
+    Route::get('/workspaces/create', CreateWorkspace::class)
+        ->name('workspaces.create')
+        ->middleware('auth');
 });
 
 

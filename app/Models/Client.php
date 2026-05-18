@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\BelongsToWorkspace;
 use App\Models\Scopes\OwnedByUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -16,12 +17,14 @@ class Client extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new OwnedByUser);
+        // static::addGlobalScope(new OwnedByUser);
+        static::addGlobalScope(new BelongsToWorkspace);
 
         // Auto-assign user_id on creation
-        static::creating(function (Client $client) {
-            if (auth()->check() && ! $client->user_id) {
-                $client->user_id = auth()->id();
+        static::creating(function (self $model) {
+            if (auth()->check() && ! $model->workspace_id) {
+                $workspace = auth()->user()->currentWorkspace();
+                $model->workspace_id = $workspace?->id;
             }
         });
     }

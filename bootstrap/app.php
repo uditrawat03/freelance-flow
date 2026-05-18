@@ -28,6 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
+
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\EnsureWorkspaceSelected::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 

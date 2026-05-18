@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\ClientService;
+use App\Services\DashboardService;
 use App\Services\InvoiceService;
+use App\Services\ProjectService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -21,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(InvoiceService::class);
+        $this->app->singleton(ClientService::class);
+        $this->app->singleton(ProjectService::class);
+        $this->app->singleton(InvoiceService::class);
+        $this->app->singleton(DashboardService::class);
     }
 
     /**

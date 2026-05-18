@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Project;
 use App\Models\Tag;
 use App\Notifications\ProjectStatusChanged;
+use App\Services\ProjectService;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
@@ -127,14 +128,14 @@ class Edit extends Component
         session()->flash('success', 'File removed.');
     }
 
-    public function update(): void
+    public function update(ProjectService $projectService): void
     {
         $this->validate();
 
         // Capture the status before saving
         $previousStatus = $this->project->status;
 
-        $this->project->update([
+        $projectService->update($this->project, [
             'client_id'   => $this->selectedClientId,
             'name'        => $this->name,
             'description' => $this->description,

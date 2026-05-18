@@ -78,35 +78,27 @@ class Create extends Component
     {
         $this->validate();
 
-        // Validate line items manually
+        // Validate line items
         foreach ($this->lineItems as $index => $item) {
             if (empty($item['description'])) {
                 $this->addError("lineItems.{$index}.description", 'Description is required.');
                 return;
             }
-            if (($item['quantity'] ?? 0) <= 0) {
-                $this->addError("lineItems.{$index}.quantity", 'Quantity must be greater than 0.');
-                return;
-            }
-            if (($item['rate'] ?? 0) < 0) {
-                $this->addError("lineItems.{$index}.rate", 'Rate cannot be negative.');
-                return;
-            }
         }
 
+        // Delegate entirely to the service
         $invoice = $invoiceService->create([
-            'client_id' => $this->client_id,
+            'client_id'  => $this->client_id,
             'project_id' => $this->project_id ?: null,
-            'notes' => $this->notes,
-            'tax_rate' => $this->tax_rate,
-            'issued_at' => $this->issued_at ?: now()->toDateString(),
-            'due_at' => $this->due_at,
+            'notes'      => $this->notes,
+            'tax_rate'   => $this->tax_rate,
+            'issued_at'  => $this->issued_at ?: now()->toDateString(),
+            'due_at'     => $this->due_at,
             'line_items' => $this->lineItems,
-            'status' => 'draft',
+            'status'     => 'draft',
         ]);
 
         session()->flash('success', "Invoice {$invoice->number} created.");
-
         $this->redirect(route('invoices.index'), navigate: true);
     }
 

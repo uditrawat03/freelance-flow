@@ -3,8 +3,8 @@
 namespace App\Livewire\Projects;
 
 use App\Models\Client;
-use App\Models\Project;
 use App\Models\Tag;
+use App\Services\ProjectService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
@@ -50,11 +50,11 @@ class Create extends Component
         }
     }
 
-    public function save(): void
+    public function save(ProjectService $projectService): void
     {
         $this->validate();
 
-        $project = Project::create([
+        $project = $projectService->create([
             'client_id'   => $this->selectedClientId,
             'name'        => $this->name,
             'description' => $this->description,

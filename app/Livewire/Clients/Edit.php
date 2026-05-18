@@ -4,6 +4,7 @@ namespace App\Livewire\Clients;
 
 use App\Livewire\Concerns\WithNotifications;
 use App\Models\Client;
+use App\Services\ClientService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
@@ -55,20 +56,20 @@ class Edit extends Component
         $this->status  = $client->status;
     }
 
-    public function update(): void
+    public function update(ClientService $clientService): void
     {
         // Validate with unique rule that ignores the current client's own email
         $this->validate([
             'email' => "required|email|max:255|unique:clients,email,{$this->client->id}",
         ]);
 
-        $this->client->update([
-            'name'    => $this->name,
-            'email'   => $this->email,
-            'phone'   => $this->phone,
-            'company' => $this->company,
-            'notes'   => $this->notes,
-            'status'  => $this->status,
+        $clientService->update($this->client, [
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone ?: null,
+            'company' => $this->company ?: null,
+            'notes' => $this->notes ?: null,
+            'status' => $this->status,
         ]);
 
         $this->notifySuccess('Client updated successfully.');
@@ -82,9 +83,9 @@ class Edit extends Component
         $this->confirmingDelete = true;
     }
 
-    public function delete(): void
+    public function delete(ClientService $clientService): void
     {
-        $this->client->delete(); // soft delete
+        $clientService->delete($this->client); // soft delete
 
         session()->flash('success', 'Client removed successfully.');
 

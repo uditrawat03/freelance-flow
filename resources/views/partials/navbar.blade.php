@@ -5,6 +5,7 @@
 
     <div class="flex items-center gap-4">
         @auth
+            <livewire:workspace-switcher />
             <livewire:notification-bell />
             
             <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>

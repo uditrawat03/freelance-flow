@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -17,10 +18,22 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Demo User',
-            'email' => 'demo@freelanceflow.test',
+         $user = User::factory()->create([
+            'name'     => 'Demo User',
+            'email'    => 'demo@freelanceflow.test',
+            'password' => bcrypt('password'),
         ]);
+
+        // Create a default workspace for the demo user
+        $workspace = Workspace::create([
+            'name'     => 'Demo Agency',
+            'slug'     => 'demo-agency',
+            'owner_id' => $user->id,
+            'plan'     => 'pro',
+        ]);
+
+        // Attach user as owner
+        $workspace->users()->attach($user->id, ['role' => 'owner']);
 
          $this->call([
             RoleAndPermissionSeeder::class,
