@@ -15,6 +15,13 @@ use Illuminate\Support\Facades\RateLimiter;
 use App\Models\Invoice;
 use App\Observers\InvoiceObserver;
 use Illuminate\Support\Facades\Gate;
+use App\Repositories\Contracts\ClientRepositoryInterface;
+use App\Repositories\Contracts\InvoiceRepositoryInterface;
+use App\Repositories\Contracts\ProjectRepositoryInterface;
+use App\Repositories\Eloquent\EloquentClientRepository;
+use App\Repositories\Eloquent\EloquentInvoiceRepository;
+use App\Repositories\Eloquent\EloquentProjectRepository;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +30,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(InvoiceService::class);
+        // Repository bindings — interface to Eloquent implementation
+        $this->app->bind(ClientRepositoryInterface::class,  EloquentClientRepository::class);
+        $this->app->bind(ProjectRepositoryInterface::class, EloquentProjectRepository::class);
+        $this->app->bind(InvoiceRepositoryInterface::class, EloquentInvoiceRepository::class);
+
+        // Services — singletons as before
         $this->app->singleton(ClientService::class);
         $this->app->singleton(ProjectService::class);
         $this->app->singleton(InvoiceService::class);

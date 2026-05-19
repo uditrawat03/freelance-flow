@@ -3,21 +3,39 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
 class InvoiceService
 {
-    /**
-     * Generate the PDF and store it on disk.
-     * Returns the stored file path.
-     */
+    public function __construct(
+        private readonly InvoiceRepositoryInterface $invoices,
+    ) {
+    }
+
+    public function create(array $data): Invoice
+    {
+        return $this->invoices->create($data);
+        // create() in the repository handles number generation and recalculate()
+    }
+
+    public function update(Invoice $invoice, array $data): Invoice
+    {
+        return $this->invoices->update($invoice, $data);
+        // update() in the repository handles recalculate()
+    }
+
+    public function delete(Invoice $invoice): void
+    {
+        $this->deletePdf($invoice);
+        $this->invoices->delete($invoice);
+    }
+
     public function generatePdf(Invoice $invoice): string
     {
-        // Eager-load everything the template needs
         $invoice->loadMissing(['client', 'project']);
 
-        // Render the Blade template to a PDF binary
         $pdf = Pdf::loadView('pdf.invoice', ['invoice' => $invoice])
             ->setPaper('a4', 'portrait')
             ->setOptions([
@@ -25,22 +43,15 @@ class InvoiceService
                 'isRemoteEnabled' => false,
             ]);
 
-        // Build the filename: INV-2026-001.pdf
-        $filename = "{$invoice->number}.pdf";
-        $path = "invoices/{$filename}";
+        $path = "invoices/{$invoice->number}.pdf";
 
-        // Store on the local private disk
         Storage::disk('local')->put($path, $pdf->output());
 
-        // Save the path on the invoice record
         $invoice->update(['pdf_path' => $path]);
 
         return $path;
     }
 
-    /**
-     * Get the PDF content for streaming/download.
-     */
     public function getPdfContent(Invoice $invoice): string
     {
         if (!$invoice->has_pdf) {
@@ -50,9 +61,6 @@ class InvoiceService
         return Storage::disk('local')->get($invoice->pdf_path);
     }
 
-    /**
-     * Delete the stored PDF (e.g. when invoice is edited).
-     */
     public function deletePdf(Invoice $invoice): void
     {
         if ($invoice->pdf_path) {
@@ -61,17 +69,18 @@ class InvoiceService
         }
     }
 
-    /**
-     * Create a new invoice with auto-generated number.
-     */
-    public function create(array $data): Invoice
+    public function totalRevenue(): float
     {
-        $data['number'] = Invoice::generateNumber();
+        return $this->invoices->totalRevenue();
+    }
 
-        $invoice = Invoice::create($data);
+    public function revenueByMonth(int $months = 12): array
+    {
+        return $this->invoices->revenueByMonth($months);
+    }
 
-        $invoice->recalculate();
-
-        return $invoice;
+    public function overdueInvoices(): \Illuminate\Support\Collection
+    {
+        return $this->invoices->overdueInvoices();
     }
 }
