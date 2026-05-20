@@ -16,14 +16,14 @@ class Invoice extends Model
 {
     use HasFactory, SoftDeletes;
 
-     protected static function booted(): void
+    protected static function booted(): void
     {
         // static::addGlobalScope(new OwnedByUser);
         static::addGlobalScope(new BelongsToWorkspace);
 
         // Auto-assign user_id on creation
         static::creating(function (self $model) {
-            if (auth()->check() && ! $model->workspace_id) {
+            if (auth()->check() && !$model->workspace_id) {
                 $workspace = auth()->user()->currentWorkspace();
                 $model->workspace_id = $workspace?->id;
             }
@@ -31,6 +31,7 @@ class Invoice extends Model
     }
 
     protected $fillable = [
+        'workspace_id',
         'user_id',
         'client_id',
         'project_id',
@@ -51,17 +52,17 @@ class Invoice extends Model
     ];
 
     protected $casts = [
-        'line_items'  => 'array',    // JSON column auto-decoded
-        'subtotal'    => 'decimal:2',
-        'tax_rate'    => 'decimal:2',
-        'tax_amount'  => 'decimal:2',
-        'total'       => 'decimal:2',
-        'issued_at'   => 'date',
-        'due_at'      => 'date',
-        'paid_at'     => 'date',
-        'created_at'  => 'datetime',
-        'updated_at'  => 'datetime',
-        'deleted_at'  => 'datetime',
+        'line_items' => 'array',    // JSON column auto-decoded
+        'subtotal' => 'decimal:2',
+        'tax_rate' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'total' => 'decimal:2',
+        'issued_at' => 'date',
+        'due_at' => 'date',
+        'paid_at' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     // --- Relationships ---
@@ -96,8 +97,8 @@ class Invoice extends Model
     public function scopeOverdue(Builder $query): void
     {
         $query->where('status', 'sent')
-              ->whereNotNull('due_at')
-              ->where('due_at', '<', now());
+            ->whereNotNull('due_at')
+            ->where('due_at', '<', now());
     }
 
     public function scopeUnpaid(Builder $query): void
@@ -110,13 +111,13 @@ class Invoice extends Model
     protected function statusLabel(): Attribute
     {
         return Attribute::make(
-            get: fn () => match($this->status) {
-                'draft'     => 'Draft',
-                'sent'      => 'Sent',
-                'paid'      => 'Paid',
-                'overdue'   => 'Overdue',
+            get: fn() => match ($this->status) {
+                'draft' => 'Draft',
+                'sent' => 'Sent',
+                'paid' => 'Paid',
+                'overdue' => 'Overdue',
                 'cancelled' => 'Cancelled',
-                default     => ucfirst($this->status),
+                default => ucfirst($this->status),
             }
         );
     }
@@ -124,38 +125,38 @@ class Invoice extends Model
     protected function formattedSubtotal(): Attribute
     {
         return Attribute::make(
-            get: fn () => '₹' . number_format($this->subtotal, 2)
+            get: fn() => '₹' . number_format($this->subtotal, 2)
         );
     }
 
     protected function formattedTotal(): Attribute
     {
         return Attribute::make(
-            get: fn () => '₹' . number_format($this->total, 2)
+            get: fn() => '₹' . number_format($this->total, 2)
         );
     }
 
     protected function formattedTaxAmount(): Attribute
     {
         return Attribute::make(
-            get: fn () => '₹' . number_format($this->tax_amount, 2)
+            get: fn() => '₹' . number_format($this->tax_amount, 2)
         );
     }
 
     protected function isOverdue(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->status === 'sent'
-                && $this->due_at
-                && $this->due_at->isPast()
+            get: fn() => $this->status === 'sent'
+            && $this->due_at
+            && $this->due_at->isPast()
         );
     }
 
     protected function hasPdf(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->pdf_path
-                && Storage::disk('local')->exists($this->pdf_path)
+            get: fn() => $this->pdf_path
+            && Storage::disk('local')->exists($this->pdf_path)
         );
     }
 
@@ -165,8 +166,8 @@ class Invoice extends Model
     public static function generateNumber(): string
     {
         $prefix = config('freelanceflow.invoice.prefix');
-        $year    = now()->year;
-        $count   = static::whereYear('created_at', $year)->count() + 1;
+        $year = now()->year;
+        $count = static::whereYear('created_at', $year)->count() + 1;
         return sprintf('%s-%d-%03d', $prefix, $year, $count);
     }
 
@@ -174,14 +175,14 @@ class Invoice extends Model
     public function recalculate(): void
     {
         $subtotal = collect($this->line_items)
-            ->sum(fn ($item) => $item['quantity'] * $item['rate']);
+            ->sum(fn($item) => $item['quantity'] * $item['rate']);
 
         $taxAmount = $subtotal * ($this->tax_rate / 100);
 
         $this->update([
-            'subtotal'   => $subtotal,
+            'subtotal' => $subtotal,
             'tax_amount' => $taxAmount,
-            'total'      => $subtotal + $taxAmount,
+            'total' => $subtotal + $taxAmount,
         ]);
     }
 
@@ -189,7 +190,7 @@ class Invoice extends Model
     public function markAsSent(): void
     {
         $this->update([
-            'status'    => 'sent',
+            'status' => 'sent',
             'issued_at' => $this->issued_at ?? now(),
         ]);
     }
@@ -198,7 +199,7 @@ class Invoice extends Model
     public function markAsPaid(): void
     {
         $this->update([
-            'status'  => 'paid',
+            'status' => 'paid',
             'paid_at' => now(),
         ]);
     }

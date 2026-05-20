@@ -17,14 +17,14 @@ class Project extends Model
 {
     use HasFactory, SoftDeletes;
 
-     protected static function booted(): void
+    protected static function booted(): void
     {
         // static::addGlobalScope(new OwnedByUser);
         static::addGlobalScope(new BelongsToWorkspace);
 
         // Auto-assign user_id on creation
         static::creating(function (self $model) {
-            if (auth()->check() && ! $model->workspace_id) {
+            if (auth()->check() && !$model->workspace_id) {
                 $workspace = auth()->user()->currentWorkspace();
                 $model->workspace_id = $workspace?->id;
             }
@@ -32,6 +32,7 @@ class Project extends Model
     }
 
     protected $fillable = [
+        'workspace_id',
         'user_id',
         'client_id',
         'name',
@@ -62,7 +63,7 @@ class Project extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class)
-                ->withPivot('tagged_at');
+            ->withPivot('tagged_at');
     }
 
     public function attachments(): HasMany

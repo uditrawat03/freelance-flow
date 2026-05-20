@@ -30,7 +30,8 @@ class Client extends Model
     }
 
     protected $fillable = [
-        'user_id', 'name', 'email', 'phone', 'company', 'notes', 'status',
+        'workspace_id', 'user_id',
+        'name', 'email', 'phone', 'company', 'notes', 'status',
     ];
 
     protected $casts = [

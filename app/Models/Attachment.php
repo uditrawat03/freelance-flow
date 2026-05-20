@@ -22,7 +22,7 @@ class Attachment extends Model
     ];
 
     protected $casts = [
-        'size'       => 'integer',
+        'size' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -60,7 +60,7 @@ class Attachment extends Model
     protected function extension(): Attribute
     {
         return Attribute::make(
-            get: fn () => strtolower(pathinfo($this->original_name, PATHINFO_EXTENSION))
+            get: fn() => strtolower(pathinfo($this->original_name, PATHINFO_EXTENSION))
         );
     }
 
@@ -68,7 +68,7 @@ class Attachment extends Model
     protected function isImage(): Attribute
     {
         return Attribute::make(
-            get: fn () => str_starts_with($this->mime_type, 'image/')
+            get: fn() => str_starts_with($this->mime_type, 'image/')
         );
     }
 
