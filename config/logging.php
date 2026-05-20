@@ -73,6 +73,38 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Separate channel for payment-related events
+        'payments' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/payments.log'),
+            'level'  => 'info',
+            'days'   => 90,  // keep payment logs longer for compliance
+        ],
+
+        // Separate channel for queue jobs
+        'queue' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/queue.log'),
+            'level'  => 'info',
+            'days'   => 14,
+        ],
+
+        // Slack — only critical errors
+        'slack-critical' => [
+            'driver'   => 'slack',
+            'url'      => env('LOG_SLACK_WEBHOOK_URL'),
+            'username' => 'FreelanceFlow',
+            'emoji'    => ':fire:',
+            'level'    => 'critical',
+        ],
+
+         // Sentry — all errors and above in production
+        'sentry' => [
+            'driver' => 'sentry',
+            'level'  => env('LOG_LEVEL', 'error'),
+            'bubble' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

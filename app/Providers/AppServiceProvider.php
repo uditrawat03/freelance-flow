@@ -40,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ProjectService::class);
         $this->app->singleton(InvoiceService::class);
         $this->app->singleton(DashboardService::class);
+        $this->app->singleton(\App\Services\Logger::class);
     }
 
     /**

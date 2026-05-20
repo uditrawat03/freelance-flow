@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use App\Services\Logger;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -34,6 +35,29 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        
+        // Log all unhandled exceptions with full context
+        $exceptions->report(function (\Throwable $e) {
+            // Skip reporting common non-critical exceptions
+            if ($e instanceof \Illuminate\Auth\AuthenticationException
+                || $e instanceof \Illuminate\Validation\ValidationException
+                || $e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException
+                || $e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                return false; // do not report these to Sentry
+            }
+
+            // Add FreelanceFlow context to every Sentry error
+            if (app()->bound('sentry') && auth()->check()) {
+                \Sentry\configureScope(function (\Sentry\State\Scope $scope): void {
+                    $scope->setUser([
+                        'id'    => auth()->id(),
+                        'email' => auth()->user()->email,
+                    ]);
+                    $scope->setTag('workspace_id', auth()->user()->currentWorkspace()?->id);
+                    $scope->setTag('environment', app()->environment());
+                });
+            }
+        });
 
         // Handle all exceptions that occur in API routes
         $exceptions->render(function (\Throwable $e, $request) {

@@ -29,22 +29,12 @@ class SendProjectNotification implements ShouldQueue
         public readonly Project $project,
     ) {}
 
-    public function handle(): void
+    public function handle(Logger $logger): void
     {
-        // Re-fetch relationships — they may not be loaded after deserialisation
         $this->project->loadMissing('client');
 
-        // Guard: do not send if the client has no email
         if (! $this->project->client?->email) {
-            Log::warning('SendProjectNotification skipped — client has no email', [
-                'project_id' => $this->project->id,
-            ]);
-            return;
-        }
-
-        // Guard: do not send if the project was deleted while queued
-        if ($this->project->trashed()) {
-            Log::info('SendProjectNotification skipped — project was deleted', [
+            $logger->warning('SendProjectNotification skipped — client has no email', [
                 'project_id' => $this->project->id,
             ]);
             return;
@@ -53,9 +43,8 @@ class SendProjectNotification implements ShouldQueue
         Mail::to($this->project->client->email)
             ->send(new ProjectCreated($this->project));
 
-        Log::info('Project notification sent', [
+        $logger->info('Project notification sent', [
             'project_id' => $this->project->id,
-            'client_id'  => $this->project->client_id,
             'to'         => $this->project->client->email,
         ]);
     }
@@ -66,6 +55,7 @@ class SendProjectNotification implements ShouldQueue
         Log::error('SendProjectNotification failed permanently', [
             'project_id' => $this->project->id,
             'error'      => $exception->getMessage(),
+            'trace'      => $exception->getTraceAsString(),
         ]);
 
         // Optionally notify the FreelanceFlow team via a different channel

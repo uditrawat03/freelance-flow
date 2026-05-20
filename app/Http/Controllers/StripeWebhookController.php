@@ -6,12 +6,17 @@ use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use App\Services\Logger;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
 class StripeWebhookController extends Controller
 {
+    public function __construct(
+        private readonly Logger $logger,
+    ) {}
+
     public function handle(Request $request): Response
     {
         Stripe::setApiKey(config('cashier.secret'));
@@ -49,29 +54,23 @@ class StripeWebhookController extends Controller
 
     private function handlePaymentSucceeded(object $paymentIntent): void
     {
-        $invoice = Invoice::where(
-            'stripe_payment_intent_id',
-            $paymentIntent->id
-        )->first();
+        $invoice = Invoice::where('stripe_payment_intent_id', $paymentIntent->id)->first();
 
-        if (!$invoice) {
-            Log::warning('Payment succeeded but no matching invoice found', [
+        if (! $invoice) {
+            $this->logger->payment('Payment succeeded but no matching invoice found', [
                 'payment_intent_id' => $paymentIntent->id,
+                'amount'            => $paymentIntent->amount / 100,
             ]);
             return;
         }
 
-        $invoice->update([
-            'stripe_payment_status' => 'succeeded',
-        ]);
-
         $invoice->markAsPaid();
 
-        Log::info('Invoice marked as paid via Stripe webhook', [
-            'invoice_id' => $invoice->id,
-            'invoice_number' => $invoice->number,
+        $this->logger->payment('Invoice marked as paid via Stripe webhook', [
+            'invoice_id'        => $invoice->id,
+            'invoice_number'    => $invoice->number,
             'payment_intent_id' => $paymentIntent->id,
-            'amount' => $paymentIntent->amount / 100,
+            'amount'            => $paymentIntent->amount / 100,
         ]);
     }
 
@@ -85,7 +84,7 @@ class StripeWebhookController extends Controller
         if ($invoice) {
             $invoice->update(['stripe_payment_status' => 'payment_failed']);
 
-            Log::warning('Stripe payment failed', [
+            $this->logger->payment('Stripe payment failed', [
                 'invoice_id' => $invoice->id,
                 'payment_intent_id' => $paymentIntent->id,
             ]);
