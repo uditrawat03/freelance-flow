@@ -48,6 +48,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->isProduction()) {
+            $this->validateRequiredConfig();
+        }
         // Throws an exception if a relationship is lazy-loaded (not eager-loaded)
         // Only enable in local/testing environments
         Model::preventLazyLoading(! app()->isProduction());
@@ -91,5 +94,30 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Invoice::observe(InvoiceObserver::class);
+    }
+
+    private function validateRequiredConfig(): void
+    {
+        $required = [
+            'app.key'              => 'APP_KEY',
+            'database.connections.mysql.host' => 'DB_HOST',
+            'cashier.secret'       => 'STRIPE_SECRET',
+            'cashier.webhook.secret' => 'STRIPE_WEBHOOK_SECRET',
+            'mail.from.address'    => 'MAIL_FROM_ADDRESS',
+        ];
+
+        $missing = [];
+
+        foreach ($required as $configKey => $envKey) {
+            if (empty(config($configKey))) {
+                $missing[] = $envKey;
+            }
+        }
+
+        if (! empty($missing)) {
+            throw new \RuntimeException(
+                'Missing required environment variables: ' . implode(', ', $missing)
+            );
+        }
     }
 }

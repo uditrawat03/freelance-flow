@@ -70,33 +70,35 @@ class Edit extends Component
 
     public function uploadFile(): void
     {
-        $this->validateOnly('newFile');
+        $maxSizeKb   = config('freelanceflow.uploads.max_size_kb', 10240);
+        $allowedMimes = implode(',', config('freelanceflow.uploads.allowed_mimes', []));
+
+        $this->validate([
+            'newFile' => [
+                'nullable',
+                'file',
+                "max:{$maxSizeKb}",
+                "mimes:{$allowedMimes}",
+            ],
+        ]);
 
         if (! $this->newFile) {
             return;
         }
 
-        $originalName = $this->newFile->getClientOriginalName();
-        $mimeType     = $this->newFile->getMimeType();
-        $size         = $this->newFile->getSize();
+        $disk       = config('freelanceflow.uploads.disk', 'local');
+        $storedName = $this->newFile->store('attachments', $disk);
 
-        // Store the file in storage/app/private/attachments/
-        $storedName = $this->newFile->store('attachments', 'local');
-
-        // Save metadata to the database
         $this->project->attachments()->create([
-            'original_name' => $originalName,
+            'original_name' => $this->newFile->getClientOriginalName(),
             'stored_name'   => $storedName,
-            'mime_type'     => $mimeType,
-            'size'          => $size,
-            'disk'          => 'local',
+            'mime_type'     => $this->newFile->getMimeType(),
+            'size'          => $this->newFile->getSize(),
+            'disk'          => $disk,
         ]);
 
-        // Reset the file input
         $this->newFile = null;
         $this->reset('newFile');
-
-        // Refresh the project to show the new attachment
         $this->project->refresh();
 
         session()->flash('success', 'File uploaded successfully.');

@@ -164,9 +164,10 @@ class Invoice extends Model
     // Auto-generate invoice number: INV-2026-001
     public static function generateNumber(): string
     {
+        $prefix = config('freelanceflow.invoice.prefix');
         $year    = now()->year;
         $count   = static::whereYear('created_at', $year)->count() + 1;
-        return sprintf('INV-%d-%03d', $year, $count);
+        return sprintf('%s-%d-%03d', $prefix, $year, $count);
     }
 
     // Recalculate totals from line items
