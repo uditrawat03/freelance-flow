@@ -1,7 +1,7 @@
 <div>
     <x-page-header title="Invoices" subtitle="Manage your invoices and track payments.">
         <a href="{{ route('invoices.create') }}"
-            class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors">
+            class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
             + New invoice
         </a>
     </x-page-header>
@@ -18,62 +18,83 @@
         @endforeach
     </div>
 
+    {{-- Status filter bar --}}
+    <div class="bg-white border border-gray-200 rounded-2xl p-4 mb-6">
+        <div class="flex items-center gap-2 flex-wrap">
+            @foreach (['' => 'All invoices', 'draft' => 'Draft', 'sent' => 'Sent', 'paid' => 'Paid', 'overdue' => 'Overdue'] as $value => $label)
+                <button wire:click="$set('status', '{{ $value }}')" 
+                    class="text-sm px-3 py-2 rounded-lg font-medium transition-colors whitespace-nowrap
+                        {{ $status === $value
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-gray-600 bg-gray-100 hover:bg-gray-200' }}">
+                    {{ $label }}
+                </button>
+            @endforeach
+        </div>
+    </div>
+
     {{-- Invoice rows --}}
+    <div class="space-y-3">
     @forelse ($invoices as $invoice)
-        <div class="bg-white border border-gray-200 rounded-lg px-5 py-4 mb-2">
-            <div class="flex items-start justify-between">
+        <x-card class="hover:shadow-md transition-shadow group">
+            <div class="flex items-center justify-between gap-4">
 
                 {{-- Left: invoice info --}}
-                <div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-semibold text-gray-900 text-sm">{{ $invoice->number }}</span>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 mb-2 flex-wrap">
+                        <a href="{{ route('invoices.preview', $invoice) }}" target="_blank" class="font-semibold text-gray-900 text-sm hover:text-indigo-600 transition-colors">
+                            {{ $invoice->number }}
+                        </a>
                         {{-- Status badge --}}
-                        <span class="text-xs font-medium px-2.5 py-1 rounded-full
-                                {{ match ($invoice->status) {
-            'paid' => 'bg-green-100 text-green-700',
-            'sent' => 'bg-blue-100 text-blue-700',
-            'overdue' => 'bg-red-100 text-red-700',
-            'draft' => 'bg-gray-100 text-gray-600',
-            default => 'bg-gray-100 text-gray-600',
-        } }}">
-                            {{ $invoice->status_label }}
-                        </span>
+                        <x-status-badge :status="$invoice->status" />
                         @if ($invoice->is_overdue)
-                            <span class="text-xs text-red-500 font-medium">
+                            <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg bg-red-100 text-red-700">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9 5a1 1 0 100 2 1 1 0 000-2zM9 9a1 1 0 000 2v4a1 1 0 102 0v-4a1 1 0 00-2-2z" clip-rule="evenodd"/>
+                                </svg>
                                 Due {{ $invoice->due_at->diffForHumans() }}
                             </span>
                         @endif
                     </div>
-                    <p class="text-sm text-gray-500 mt-0.5">{{ $invoice->client->name }}</p>
-                    <p class="text-xs text-gray-400 mt-0.5">
-                        {{ $invoice->issued_at ? $invoice->issued_at->format('M d, Y') : 'No date' }}
-                        @if ($invoice->due_at)
-                            · Due {{ $invoice->due_at->format('M d, Y') }}
-                        @endif
-                    </p>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-xs text-gray-500">Client</p>
+                            <p class="font-medium text-gray-900">{{ $invoice->client->name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Dates</p>
+                            <p class="text-sm text-gray-700">
+                                {{ $invoice->issued_at?->format('M d') ?? 'N/A' }} → {{ $invoice->due_at?->format('M d') ?? 'N/A' }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Right: total + actions --}}
-                <div class="flex items-center gap-4">
-                    <span class="text-base font-bold text-gray-900">{{ $invoice->formatted_total }}</span>
+                <div class="flex items-center gap-4 flex-shrink-0">
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500">Amount</p>
+                        <p class="text-lg font-bold text-gray-900">{{ $invoice->formatted_total }}</p>
+                    </div>
 
-                    {{-- Actions --}}
-                    <div class="flex items-center gap-2">
-
-                        {{-- Generate PDF --}}
+                    {{-- Quick actions dropdown --}}
+                    <div class="flex items-center gap-1">
+                        {{-- Generate/Download PDF --}}
                         @if (!$invoice->has_pdf)
                             <button wire:click="confirmGenerate({{ $invoice->id }})"
-                                class="text-xs text-indigo-600 hover:text-indigo-800 font-medium border border-indigo-200 px-2.5 py-1 rounded-md hover:bg-indigo-50 transition-colors">
-                                Generate PDF
+                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                title="Generate PDF">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
                             </button>
                         @else
                             <a href="{{ route('invoices.download', $invoice) }}"
-                                class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
-                                Download PDF
-                            </a>
-                            <a href="{{ route('invoices.preview', $invoice) }}" target="_blank"
-                                class="text-xs text-gray-500 hover:text-gray-700">
-                                Preview
+                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                title="Download PDF">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
                             </a>
                         @endif
 
@@ -82,8 +103,11 @@
                             @can('send invoices')
                                 <button wire:click="markSent({{ $invoice->id }})"
                                     wire:confirm="Mark invoice {{ $invoice->number }} as sent?"
-                                    class="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                                    Mark sent
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                                    title="Mark as sent">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
                                 </button>
                             @endcan
                         @endif
@@ -92,32 +116,36 @@
                         @if (in_array($invoice->status, ['sent', 'overdue']))
                             <button wire:click="markPaid({{ $invoice->id }})"
                                 wire:confirm="Mark invoice {{ $invoice->number }} as paid?"
-                                class="text-xs text-green-600 hover:text-green-800 font-medium">
-                                Mark paid
+                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-green-600 hover:bg-green-50 transition-colors"
+                                title="Mark as paid">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
                             </button>
-                            <a href="{{ route('invoices.pay', $invoice) }}" target="_blank"
-                                class="text-xs text-purple-600 hover:text-purple-800 font-medium">
-                                Pay link
-                            </a>
                         @endif
 
                         {{-- Delete --}}
                         @can('delete invoices')
                             <button wire:click="confirmDelete({{ $invoice->id }})"
-                                class="text-xs text-red-400 hover:text-red-600">
-                                Delete
+                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                                title="Delete">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
                             </button>
                         @endcan
-
                     </div>
                 </div>
 
             </div>
-        </div>
+        </x-card>
     @empty
-        <x-empty-state message="No invoices yet." cta-text="Create your first invoice"
+        <x-empty-state 
+            message="No invoices yet." 
+            cta-text="Create your first invoice"
             :cta-href="route('invoices.create')" />
     @endforelse
+    </div>
 
     {{-- Pagination --}}
     @if ($invoices->hasPages())

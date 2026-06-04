@@ -14,24 +14,26 @@
     {{-- Required for Flux dark mode support --}}
     @fluxAppearance
 </head>
-<body class="min-h-screen font-sans antialiased">
+<body class="min-h-screen font-sans antialiased bg-gray-50">
 
     @include('partials.navbar')
 
-    <div class="flex mt-16">
+    <div class="flex pt-16">
         @auth
             @include('partials.sidebar')
         @endauth
 
-
-        <main class="flex-1 p-6">
-            {{-- Flash message --}}
-            <x-flash-message />
-            @hasSection('content')
-                @yield('content')
-            @else
-                {{ $slot ?? '' }}
-            @endif
+        <main class="flex-1 min-h-[calc(100vh-64px)]">
+            <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                {{-- Flash message --}}
+                <x-flash-message />
+                
+                @hasSection('content')
+                    @yield('content')
+                @else
+                    {{ $slot ?? '' }}
+                @endif
+            </div>
         </main>
     </div>
 
