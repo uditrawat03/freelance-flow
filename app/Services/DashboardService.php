@@ -19,11 +19,24 @@ class DashboardService
     ) {
     }
 
+    private function workspaceId(): int|null
+    {
+        return auth()->user()->currentWorkspace()?->id;
+    }
+
+    private function cache(): \Illuminate\Cache\TaggedCache
+    {
+        return Cache::tags([
+            'dashboard',
+            "workspace:{$this->workspaceId()}",
+        ]);
+    }
+
     public function stats(): array
     {
-        $workspaceId = auth()->user()->currentWorkspace()?->id;
+        $workspaceId = $this->workspaceId();
 
-        return Cache::remember("dashboard_stats_{$workspaceId}", 300, function () {
+        return $this->cache()->remember("dashboard_stats_{$workspaceId}", 300, function () {
             return [
                 'total_clients' => Client::active()->count(),
                 'active_projects' => Project::active()->count(),
@@ -40,9 +53,9 @@ class DashboardService
 
     public function revenueChart(int $months = 12): array
     {
-        $workspaceId = auth()->user()->currentWorkspace()?->id;
+        $workspaceId = $this->workspaceId();
 
-        return Cache::remember("revenue_chart_{$months}_{$workspaceId}", 300, function () use ($months) {
+        return $this->cache()->remember("revenue_chart_{$months}_{$workspaceId}", 300, function () use ($months) {
             $chart = $this->invoices->revenueByMonth($months);
             $chart['total'] = array_sum($chart['data']);
             return $chart;
@@ -73,10 +86,17 @@ class DashboardService
 
     public function bustCache(): void
     {
-        $workspaceId = auth()->user()->currentWorkspace()?->id;
+        Cache::tags([
+            'dashboard',
+            "workspace:{$this->workspaceId()}",
+        ])->flush();
 
-        foreach (['dashboard_stats', 'revenue_chart_3', 'revenue_chart_6', 'revenue_chart_12'] as $key) {
-            Cache::forget("{$key}_{$workspaceId}");
-        }
+        Cache::forget("recent_activity_{$this->workspaceId()}");
+    
+        // $workspaceId = $this->workspaceId();
+
+        // foreach (['dashboard_stats', 'revenue_chart_3', 'revenue_chart_6', 'revenue_chart_12'] as $key) {
+        //     $this->cache()->forget("{$key}_{$workspaceId}");
+        // }
     }
 }

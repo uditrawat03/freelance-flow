@@ -12,8 +12,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\Project;
+
+use App\Observers\ClientObserver;
 use App\Observers\InvoiceObserver;
+use App\Observers\ProjectObserver;
+
 use Illuminate\Support\Facades\Gate;
 use App\Repositories\Contracts\ClientRepositoryInterface;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
@@ -93,7 +99,10 @@ class AppServiceProvider extends ServiceProvider
                 : Limit::perMinute(30)->by($request->ip());
         });
 
+        Client::observe(ClientObserver::class);
+        Project::observe(ProjectObserver::class);
         Invoice::observe(InvoiceObserver::class);
+
     }
 
     private function validateRequiredConfig(): void

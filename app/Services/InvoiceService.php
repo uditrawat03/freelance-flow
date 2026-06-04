@@ -6,6 +6,8 @@ use App\Models\Invoice;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
+
 
 class InvoiceService
 {
@@ -16,20 +18,23 @@ class InvoiceService
 
     public function create(array $data): Invoice
     {
-        return $this->invoices->create($data);
-        // create() in the repository handles number generation and recalculate()
+        $invoice =  $this->invoices->create($data);
+        $this->bustCache();
+        return $invoice;
     }
 
     public function update(Invoice $invoice, array $data): Invoice
     {
-        return $this->invoices->update($invoice, $data);
-        // update() in the repository handles recalculate()
+        $updated = $this->invoices->update($invoice, $data);
+        $this->bustCache();
+        return $updated;
     }
 
     public function delete(Invoice $invoice): void
     {
         $this->deletePdf($invoice);
         $this->invoices->delete($invoice);
+        $this->bustCache();
     }
 
     public function generatePdf(Invoice $invoice): string
@@ -83,4 +88,19 @@ class InvoiceService
     {
         return $this->invoices->overdueInvoices();
     }
+
+    private function workspaceId(): int|null
+    {
+        return auth()->user()->currentWorkspace()?->id;
+    }
+
+    public function bustCache(): void
+    {
+        Cache::tags([
+            'invoices',
+            'dashboard',
+            "workspace:{$this->workspaceId()}",
+        ])->flush();
+    }
+
 }

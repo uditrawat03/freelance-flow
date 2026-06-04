@@ -9,23 +9,25 @@ class InvoiceObserver
 {
     public function created(Invoice $invoice): void
     {
-        $this->bustCache();
+        $this->bustCache($invoice);
     }
 
     public function updated(Invoice $invoice): void
     {
-        $this->bustCache();
+        $this->bustCache($invoice);
     }
 
     public function deleted(Invoice $invoice): void
     {
-        $this->bustCache();
+        $this->bustCache($invoice);
     }
 
-    private function bustCache(): void
+    private function bustCache(Invoice $invoice): void
     {
-        // Clear dashboard stats cache for all users
-        // In a multi-user system, scope this to auth()->id()
-        Cache::forget('dashboard_stats_' . auth()->id());
+        Cache::tags([
+            'invoices',
+            'dashboard',
+            "workspace:{$invoice->workspace_id}",
+        ])->flush();
     }
 }

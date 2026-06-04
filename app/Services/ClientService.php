@@ -14,6 +14,11 @@ class ClientService
     ) {
     }
 
+    private function workspaceId(): int|null
+    {
+        return auth()->user()->currentWorkspace()?->id;
+    }
+
     public function list(
         string $search = '',
         string $status = '',
@@ -44,16 +49,30 @@ class ClientService
 
     public function statistics(): array
     {
-        $workspaceId = auth()->user()->currentWorkspace()?->id;
+        $workspaceId = $this->workspaceId();
 
-        return Cache::remember("client_stats_{$workspaceId}", 300, function () {
+        return Cache::tags([
+            'clients',
+            "workspace:{$workspaceId}",
+        ])->remember("client_stats_{$workspaceId}", 300, function () {
             return $this->clients->countByStatus();
         });
     }
 
     public function bustCache(): void
     {
-        $workspaceId = auth()->user()->currentWorkspace()?->id;
-        Cache::forget("client_stats_{$workspaceId}");
+        Cache::tags([
+            'clients',
+            "workspace:{$this->workspaceId()}",
+        ])->flush();
+
+        // Also bust dashboard since client count changes affect it
+        Cache::tags([
+            'dashboard',
+            "workspace:{$this->workspaceId()}",
+        ])->flush();
+
+        // $workspaceId = $this->workspaceId();
+        // Cache::forget("client_stats_{$workspaceId}");
     }
 }
