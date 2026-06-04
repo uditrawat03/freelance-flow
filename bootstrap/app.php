@@ -16,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // if (app()->isLocal()) {
+        //     $middleware->web(append: [
+        //         \App\Http\Middleware\TrackCachePerformance::class,
+        //     ]);
+        // }
+        
         $middleware->api(prepend: [
             \App\Http\Middleware\ForceJsonResponse::class,
         ]);

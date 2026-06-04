@@ -37,6 +37,11 @@ Schedule::command('clients:archive-leads --days=90')
 Schedule::command('livewire:clean-uploads')
     ->daily();
 
+Schedule::command('cache:warm')
+    ->dailyAt('05:00')
+    ->withoutOverlapping()
+    ->runInBackground();
+
 // Prune stale queue jobs older than 48 hours
 Schedule::command('queue:prune-failed --hours=48')
     ->daily();

@@ -3,7 +3,7 @@
     'hover' => true,
 ])
 
-<div {{ $attributes->merge(['class' => 'overflow-x-auto rounded-2xl border border-gray-100']) }}>
+<div {{ $attributes->merge(['class' => 'overflow-x-auto rounded-lg border border-border bg-surface shadow-soft']) }}>
     <table class="w-full text-sm">
         {{ $slot }}
     </table>

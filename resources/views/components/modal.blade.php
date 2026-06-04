@@ -32,13 +32,13 @@
     <!-- Modal -->
     <div x-show="open"
          x-transition
-         class="relative bg-white rounded-2xl shadow-lg {{ $sizes[$size] }} w-full p-6">
+         class="relative w-full {{ $sizes[$size] }} rounded-lg border border-border bg-surface p-6 shadow-lifted">
 
         {{-- Header --}}
         @if($title)
-            <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-4">
-                <h2 class="text-lg font-semibold text-gray-900">{{ $title }}</h2>
-                <button @click="open = false" class="text-gray-400 hover:text-gray-600">
+            <div class="mb-4 flex items-center justify-between border-b border-border pb-4">
+                <h2 class="text-lg font-semibold text-foreground">{{ $title }}</h2>
+                <button @click="open = false" class="text-muted hover:text-secondary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -53,7 +53,7 @@
 
         {{-- Footer actions --}}
         @if(isset($footer))
-            <div class="mt-6 border-t border-gray-100 pt-4 flex gap-3 justify-end">
+            <div class="mt-6 flex justify-end gap-3 border-t border-border pt-4">
                 {{ $footer }}
             </div>
         @endif

@@ -10,7 +10,7 @@
 
 <div x-data="{ open: false }" @click.away="open = false" class="relative inline-block">
     <button @click="open = ! open"
-            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm font-medium text-gray-700 transition-colors">
+            class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-surface-muted">
         {{ $label }}
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -19,7 +19,7 @@
 
     <div x-show="open"
          x-transition
-         class="absolute {{ $alignClass }} mt-2 w-48 rounded-xl shadow-lg border border-gray-100 bg-white z-40">
+         class="absolute {{ $alignClass }} z-40 mt-2 w-48 rounded-lg border border-border bg-surface shadow-lifted">
         <div class="py-1">
             {{ $slot }}
         </div>

@@ -1,4 +1,4 @@
-<thead class="bg-gray-50 border-b border-gray-100">
+<thead class="border-b border-border bg-surface-muted">
     <tr>
         {{ $slot }}
     </tr>

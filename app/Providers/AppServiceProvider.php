@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Project;
+use App\Models\Tag;
+use App\Observers\TagObserver;
 
 use App\Observers\ClientObserver;
 use App\Observers\InvoiceObserver;
@@ -102,6 +104,7 @@ class AppServiceProvider extends ServiceProvider
         Client::observe(ClientObserver::class);
         Project::observe(ProjectObserver::class);
         Invoice::observe(InvoiceObserver::class);
+        Tag::observe(TagObserver::class);
 
     }
 

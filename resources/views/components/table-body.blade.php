@@ -1,3 +1,3 @@
-<tbody class="divide-y divide-gray-100">
+<tbody class="divide-y divide-border">
     {{ $slot }}
 </tbody>

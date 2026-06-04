@@ -14,7 +14,7 @@
     {{-- Required for Flux dark mode support --}}
     @fluxAppearance
 </head>
-<body class="min-h-screen font-sans antialiased bg-gray-50">
+<body class="min-h-screen bg-background font-sans antialiased text-foreground">
 
     @include('partials.navbar')
 
@@ -23,7 +23,7 @@
             @include('partials.sidebar')
         @endauth
 
-        <main class="flex-1 min-h-[calc(100vh-64px)]">
+        <main class="flex-1 min-h-[calc(100vh-64px)] bg-background">
             <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
                 {{-- Flash message --}}
                 <x-flash-message />

@@ -9,7 +9,7 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#6366f1',
+          DEFAULT: '#005cff',
         }
       },
       borderRadius: {

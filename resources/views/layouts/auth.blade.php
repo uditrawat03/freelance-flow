@@ -11,7 +11,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @fluxAppearance
 </head>
-<body class="min-h-screen font-sans antialiased flex items-center justify-center">
+<body class="flex min-h-screen items-center justify-center bg-background px-4 py-10 font-sans text-foreground antialiased">
 
     {{ $slot }}
 

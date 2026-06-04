@@ -1,126 +1,141 @@
 <div>
     <x-page-header title="Edit Project" subtitle="Update {{ $project->name }}.">
-        <a href="{{ route('clients.show', $project->client_id) }}" class="text-sm text-gray-500 hover:text-gray-700">
+        <a href="{{ route('clients.show', $project->client_id) }}" class="text-sm font-semibold text-muted hover:text-primary">
             &larr; Back to client
         </a>
     </x-page-header>
 
-    <x-form-card>
-        <flux:field>
-            <flux:label>Client <span class="text-red-500">*</span></flux:label>
-            <flux:select wire:model="selectedClientId">
-                <option value="">Select a client</option>
-                @foreach ($clients as $client)
-                    <option value="{{ $client->id }}">{{ $client->name }}</option>
-                @endforeach
-            </flux:select>
-            <flux:error name="selectedClientId" />
-        </flux:field>
-
-        <flux:field>
-            <flux:label>Project name <span class="text-red-500">*</span></flux:label>
-            <flux:input wire:model.live="name" type="text" placeholder="Website redesign" />
-            <flux:error name="name" />
-        </flux:field>
-
-        <flux:field>
-            <flux:label>Description <span class="text-gray-400 text-xs font-normal">(optional)</span></flux:label>
-            <flux:textarea
-                wire:model="description"
-                placeholder="Scope, goals, or notes for this project..."
-                rows="4"
-            />
-            <flux:error name="description" />
-        </flux:field>
-
-        <div class="grid gap-5 sm:grid-cols-2">
-            <flux:field>
-                <flux:label>Status <span class="text-red-500">*</span></flux:label>
-                <flux:select wire:model="status">
-                    <option value="draft">Draft</option>
-                    <option value="active">Active</option>
-                    <option value="on_hold">On hold</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                </flux:select>
-                <flux:error name="status" />
-            </flux:field>
-
-            <flux:field>
-                <flux:label>Budget <span class="text-gray-400 text-xs font-normal">(optional)</span></flux:label>
-                <flux:input wire:model="budget" type="number" min="0" step="0.01" placeholder="50000" />
-                <flux:error name="budget" />
-            </flux:field>
-        </div>
-
-        <flux:field>
-            <flux:label>Deadline <span class="text-gray-400 text-xs font-normal">(optional)</span></flux:label>
-            <flux:input wire:model="deadline" type="date" />
-            <flux:error name="deadline" />
-        </flux:field>
-
-        <flux:field>
-            <flux:label>Tags <span class="text-gray-400 text-xs font-normal">(optional)</span></flux:label>
-            <div class="flex flex-wrap gap-2 mt-1">
-                @forelse ($tags as $tag)
-                    <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            wire:model="selectedTags"
-                            value="{{ $tag->id }}"
-                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span
-                            class="text-xs font-medium px-2 py-0.5 rounded-full"
-                            style="background-color: {{ $tag->colour }}22; color: {{ $tag->colour }}"
-                        >
-                            {{ $tag->name }}
-                        </span>
-                    </label>
-                @empty
-                    <p class="text-sm text-gray-500">No tags available yet.</p>
-                @endforelse
+    <x-form-card max-width="max-w-5xl">
+        <section class="space-y-5">
+            <div>
+                <h2 class="text-base font-semibold text-foreground">Project details</h2>
+                <p class="mt-1 text-sm text-muted">Keep the client, name, and scope aligned with the latest work.</p>
             </div>
-            <flux:error name="selectedTags" />
-        </flux:field>
 
-        <div class="border-t border-gray-100 pt-5">
-            <h3 class="text-sm font-medium text-gray-900 mb-3">Attachments</h3>
+            <div class="grid gap-5 lg:grid-cols-2">
+                <flux:field>
+                    <flux:label>Client <span class="text-danger">*</span></flux:label>
+                    <flux:select wire:model="selectedClientId">
+                        <option value="">Select a client</option>
+                        @foreach ($clients as $client)
+                            <option value="{{ $client->id }}">{{ $client->name }}</option>
+                        @endforeach
+                    </flux:select>
+                    <flux:error name="selectedClientId" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>Project name <span class="text-danger">*</span></flux:label>
+                    <flux:input wire:model.live="name" type="text" placeholder="Website redesign" />
+                    <flux:error name="name" />
+                </flux:field>
+
+                <flux:field class="lg:col-span-2">
+                    <flux:label>Description <span class="text-muted text-xs font-normal">(optional)</span></flux:label>
+                    <flux:textarea wire:model="description" placeholder="Scope, goals, or notes for this project..." rows="4" />
+                    <flux:error name="description" />
+                </flux:field>
+            </div>
+        </section>
+
+        <section class="space-y-5 border-t border-border pt-5">
+            <div>
+                <h2 class="text-base font-semibold text-foreground">Planning</h2>
+                <p class="mt-1 text-sm text-muted">Update lifecycle, budget, deadline, and labels.</p>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-3">
+                <flux:field>
+                    <flux:label>Status <span class="text-danger">*</span></flux:label>
+                    <flux:select wire:model="status">
+                        <option value="draft">Draft</option>
+                        <option value="active">Active</option>
+                        <option value="on_hold">On hold</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </flux:select>
+                    <flux:error name="status" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>Budget <span class="text-muted text-xs font-normal">(optional)</span></flux:label>
+                    <flux:input wire:model="budget" type="number" min="0" step="0.01" placeholder="50000" />
+                    <flux:error name="budget" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>Deadline <span class="text-muted text-xs font-normal">(optional)</span></flux:label>
+                    <flux:input wire:model="deadline" type="date" />
+                    <flux:error name="deadline" />
+                </flux:field>
+            </div>
+
+            <flux:field>
+                <flux:label>Tags <span class="text-muted text-xs font-normal">(optional)</span></flux:label>
+                <div class="mt-2 flex flex-wrap gap-2 rounded-lg border border-border bg-surface-muted p-3">
+                    @forelse ($tags as $tag)
+                        <label class="group inline-flex cursor-pointer items-center gap-2 rounded-md border border-border bg-surface px-2.5 py-2 shadow-soft transition hover:border-primary">
+                            <input
+                                type="checkbox"
+                                wire:model="selectedTags"
+                                value="{{ $tag->id }}"
+                                class="h-4 w-4 rounded border-border text-primary focus:ring-primary/15"
+                            />
+                            <span
+                                class="rounded-md px-2 py-0.5 text-xs font-semibold"
+                                style="background-color: {{ $tag->colour }}22; color: {{ $tag->colour }}"
+                            >
+                                {{ $tag->name }}
+                            </span>
+                        </label>
+                    @empty
+                        <p class="text-sm text-muted">No tags available yet.</p>
+                    @endforelse
+                </div>
+                <flux:error name="selectedTags" />
+            </flux:field>
+        </section>
+
+        <section class="space-y-4 border-t border-border pt-5">
+            <div>
+                <h2 class="text-base font-semibold text-foreground">Attachments</h2>
+                <p class="mt-1 text-sm text-muted">Store supporting files for this project.</p>
+            </div>
 
             @if ($attachments->isNotEmpty())
-                <div class="space-y-2 mb-4">
+                <div class="space-y-2">
                     @foreach ($attachments as $attachment)
-                        <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg border border-gray-200">
-                            <div class="flex items-center gap-3 min-w-0">
+                        <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface-muted p-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div class="flex min-w-0 items-center gap-3">
                                 <div @class([
-                                    'w-8 h-8 rounded flex items-center justify-center flex-shrink-0',
+                                    'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md',
                                     match ($attachment->extension) {
                                         'pdf' => 'bg-red-100 text-red-600',
                                         'doc', 'docx' => 'bg-blue-100 text-blue-600',
                                         'xls', 'xlsx' => 'bg-green-100 text-green-600',
                                         'png', 'jpg', 'jpeg', 'gif' => 'bg-purple-100 text-purple-600',
                                         'zip' => 'bg-yellow-100 text-yellow-600',
-                                        default => 'bg-gray-100 text-gray-600',
+                                        default => 'bg-surface text-muted',
                                     },
                                 ])>
                                     <span class="text-xs font-bold uppercase">{{ $attachment->extension }}</span>
                                 </div>
 
                                 <div class="min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                    <p class="truncate text-sm font-semibold text-foreground">
                                         {{ $attachment->original_name }}
                                     </p>
-                                    <p class="text-xs text-gray-400">
+                                    <p class="text-xs text-muted">
                                         {{ $attachment->formatted_size }}
                                         &middot; {{ $attachment->created_at->diffForHumans() }}
                                     </p>
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-3 shrink-0 ml-3">
+                            <div class="flex shrink-0 items-center gap-3 sm:ml-3">
                                 <a
                                     href="{{ route('attachments.download', $attachment) }}"
-                                    class="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                                    class="text-xs font-semibold text-primary hover:text-primary-hover"
                                 >
                                     Download
                                 </a>
@@ -128,7 +143,7 @@
                                 <button
                                     type="button"
                                     wire:click="confirmDeleteAttachment({{ $attachment->id }})"
-                                    class="text-xs text-red-500 hover:text-red-700"
+                                    class="text-xs font-semibold text-danger hover:text-red-700"
                                 >
                                     Remove
                                 </button>
@@ -137,7 +152,9 @@
                     @endforeach
                 </div>
             @else
-                <p class="mb-4 text-sm text-gray-500">No files attached yet.</p>
+                <p class="rounded-lg border border-dashed border-border bg-surface-muted p-4 text-sm text-muted">
+                    No files attached yet.
+                </p>
             @endif
 
             <flux:field>
@@ -145,58 +162,60 @@
                 <input
                     type="file"
                     wire:model="newFile"
-                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                    class="block w-full cursor-pointer rounded-lg border border-border bg-surface text-sm text-muted shadow-soft file:mr-4 file:border-0 file:bg-primary-soft file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-primary hover:file:bg-blue-100"
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip"
                 />
                 <flux:error name="newFile" />
 
                 @if ($newFile)
-                    <div class="mt-2 flex flex-wrap items-center gap-3">
-                        <p class="text-xs text-gray-600">
-                            Ready to upload: <span class="font-medium">{{ $newFile->getClientOriginalName() }}</span>
+                    <div class="mt-3 flex flex-col gap-3 rounded-lg border border-border bg-surface-muted p-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-xs text-muted">
+                            Ready to upload: <span class="font-semibold text-secondary">{{ $newFile->getClientOriginalName() }}</span>
                             ({{ round($newFile->getSize() / 1024, 1) }} KB)
                         </p>
-                        <flux:button wire:click="uploadFile" wire:loading.attr="disabled" size="sm" variant="primary">
-                            <span wire:loading.remove wire:target="uploadFile">Upload</span>
-                            <span wire:loading wire:target="uploadFile">Uploading...</span>
-                        </flux:button>
-                        <button
-                            type="button"
-                            wire:click="$set('newFile', null)"
-                            class="text-xs text-gray-400 hover:text-gray-600"
-                        >
-                            Cancel
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button
+                                type="button"
+                                wire:click="$set('newFile', null)"
+                                class="text-xs font-semibold text-muted hover:text-secondary"
+                            >
+                                Cancel
+                            </button>
+                            <flux:button wire:click="uploadFile" wire:loading.attr="disabled" size="sm" variant="primary">
+                                <span wire:loading.remove wire:target="uploadFile">Upload</span>
+                                <span wire:loading wire:target="uploadFile">Uploading...</span>
+                            </flux:button>
+                        </div>
                     </div>
                 @endif
             </flux:field>
-        </div>
+        </section>
 
-        <div class="flex items-center gap-3 pt-2">
+        <div class="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-end">
+            <a href="{{ route('clients.show', $project->client_id) }}" class="text-center text-sm font-semibold text-muted hover:text-secondary">
+                Cancel
+            </a>
+
             <flux:button wire:click="update" wire:loading.attr="disabled" variant="primary">
                 <span wire:loading.remove wire:target="update">Save changes</span>
                 <span wire:loading wire:target="update">Saving...</span>
             </flux:button>
-
-            <a href="{{ route('clients.show', $project->client_id) }}" class="text-sm text-gray-500 hover:text-gray-700">
-                Cancel
-            </a>
         </div>
     </x-form-card>
 
     <flux:modal wire:model="confirmingDelete" class="max-w-sm">
-        <div class="p-6 space-y-4">
-            <h3 class="text-lg font-semibold text-gray-900">Remove file?</h3>
-            <p class="text-sm text-gray-500">
+        <div class="space-y-4 p-6">
+            <h3 class="text-lg font-semibold text-foreground">Remove file?</h3>
+            <p class="text-sm text-muted">
                 This file will be permanently deleted from FreelanceFlow.
                 This cannot be undone.
             </p>
-            <div class="flex items-center gap-3">
-                <flux:button wire:click="deleteAttachment" wire:loading.attr="disabled" variant="danger" class="flex-1">
-                    Yes, remove
-                </flux:button>
+            <div class="flex flex-col-reverse gap-3 sm:flex-row">
                 <flux:button wire:click="$set('confirmingDelete', false)" variant="ghost" class="flex-1">
                     Cancel
+                </flux:button>
+                <flux:button wire:click="deleteAttachment" wire:loading.attr="disabled" variant="danger" class="flex-1">
+                    Yes, remove
                 </flux:button>
             </div>
         </div>

@@ -23,17 +23,17 @@
         @if($isChecked) checked @endif
         @if($disabled) disabled @endif
         {{ $attributes->merge(['class' => '
-            w-5 h-5 rounded-full border-2 border-gray-200 text-indigo-600
+            w-5 h-5 rounded-full border-2 border-border text-primary
             transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:ring-offset-2
+            focus:outline-none focus:ring-4 focus:ring-primary/15 focus:ring-offset-2
             cursor-pointer
-            ' . ($hasError ? 'border-red-300' : '')
+            ' . ($hasError ? 'border-danger' : '')
             . ($disabled ? ' opacity-50 cursor-not-allowed' : '')
         ]) }}
     />
 
     @if($label)
-        <label for="{{ $radioId }}" class="text-sm font-medium text-gray-700 cursor-pointer">
+        <label for="{{ $radioId }}" class="cursor-pointer text-sm font-semibold text-secondary">
             {{ $label }}
         </label>
     @endif

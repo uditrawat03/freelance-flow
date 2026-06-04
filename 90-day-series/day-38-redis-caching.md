@@ -45,11 +45,18 @@ redis-cli ping
 # PONG
 ```
 
-Install the PHP Redis client:
+Install or enable the PHP Redis client. For production, prefer the `phpredis` extension because it is faster and supports persistent connections:
+
+```bash
+# Ubuntu/Debian example
+sudo apt-get install php-redis
+php -m | grep redis
+```
+
+If your environment cannot install PHP extensions, use Predis as a fallback:
 
 ```bash
 composer require predis/predis
-# Or use phpredis extension (faster but requires compilation)
 ```
 
 ---
@@ -59,10 +66,17 @@ composer require predis/predis
 Update `.env`:
 
 ```env
-REDIS_CLIENT=predis
+REDIS_CLIENT=phpredis
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=null
 REDIS_PORT=6379
+REDIS_DB=0
+REDIS_CACHE_DB=1
+REDIS_PERSISTENT=false
+REDIS_MAX_RETRIES=3
+REDIS_BACKOFF_ALGORITHM=decorrelated_jitter
+REDIS_BACKOFF_BASE=100
+REDIS_BACKOFF_CAP=1000
 
 # Switch cache, session, and queue to Redis
 CACHE_STORE=redis
@@ -75,11 +89,12 @@ Open `config/database.php` and verify the Redis configuration:
 ```php
 'redis' => [
 
-    'client' => env('REDIS_CLIENT', 'predis'),
+    'client' => env('REDIS_CLIENT', 'phpredis'),
 
     'options' => [
-        'cluster' => env('REDIS_CLUSTER', 'redis'),
-        'prefix'  => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
+        'cluster'    => env('REDIS_CLUSTER', 'redis'),
+        'prefix'     => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+        'persistent' => env('REDIS_PERSISTENT', false),
     ],
 
     'default' => [
@@ -88,7 +103,11 @@ Open `config/database.php` and verify the Redis configuration:
         'username' => env('REDIS_USERNAME'),
         'password' => env('REDIS_PASSWORD'),
         'port'     => env('REDIS_PORT', '6379'),
-        'database' => env('REDIS_DB', '0'),
+        'database'          => env('REDIS_DB', '0'),
+        'max_retries'       => env('REDIS_MAX_RETRIES', 3),
+        'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
+        'backoff_base'      => env('REDIS_BACKOFF_BASE', 100),
+        'backoff_cap'       => env('REDIS_BACKOFF_CAP', 1000),
     ],
 
     'cache' => [
@@ -97,13 +116,17 @@ Open `config/database.php` and verify the Redis configuration:
         'username' => env('REDIS_USERNAME'),
         'password' => env('REDIS_PASSWORD'),
         'port'     => env('REDIS_PORT', '6379'),
-        'database' => env('REDIS_CACHE_DB', '1'), // separate DB for cache
+        'database'          => env('REDIS_CACHE_DB', '1'), // separate DB for cache
+        'max_retries'       => env('REDIS_MAX_RETRIES', 3),
+        'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
+        'backoff_base'      => env('REDIS_BACKOFF_BASE', 100),
+        'backoff_cap'       => env('REDIS_BACKOFF_CAP', 1000),
     ],
 
 ],
 ```
 
-Using a separate Redis database (`REDIS_CACHE_DB=1`) for cache keeps cache and session data isolated. You can flush the cache without touching sessions.
+Using a separate Redis database (`REDIS_CACHE_DB=1`) for cache keeps cache and session data isolated. You can flush the cache without touching sessions. In larger deployments, use separate Redis instances or managed Redis databases for cache, queues, and sessions so one workload cannot exhaust memory for the others.
 
 Open `config/cache.php` and verify the Redis store:
 
@@ -147,7 +170,193 @@ Cache::tags(["workspace:{$workspaceId}"])->flush();
 
 ---
 
+## Production Fix — Centralize Cache Tag Safety
+
+The current code uses `Cache::tags()` in services and observers. That is fine when `CACHE_STORE=redis`, but it will throw an exception if local development still uses `database` or `file`. For a scalable app, hide that driver detail behind one small service.
+
+Create `app/Services/CacheService.php`:
+
+```php
+<?php
+
+namespace App\Services;
+
+use Closure;
+use Illuminate\Cache\TaggableStore;
+use Illuminate\Contracts\Cache\Lock;
+use Illuminate\Support\Facades\Cache;
+
+class CacheService
+{
+    public function supportsTags(): bool
+    {
+        return Cache::getStore() instanceof TaggableStore;
+    }
+
+    public function workspaceKey(string $name, int|string|null $workspaceId, mixed ...$parts): string
+    {
+        return collect([$name, $workspaceId, ...$parts])
+            ->filter(fn ($part) => $part !== null && $part !== '')
+            ->implode(':');
+    }
+
+    public function remember(array $tags, string $key, int $ttl, Closure $callback): mixed
+    {
+        if ($this->supportsTags()) {
+            return Cache::tags($tags)->remember($key, $ttl, $callback);
+        }
+
+        return Cache::remember($key, $ttl, $callback);
+    }
+
+    public function flush(array $tags, array $fallbackKeys = []): void
+    {
+        if ($this->supportsTags()) {
+            Cache::tags($tags)->flush();
+            return;
+        }
+
+        foreach ($fallbackKeys as $key) {
+            Cache::forget($key);
+        }
+    }
+
+    public function lock(string $name, int $seconds): Lock
+    {
+        return Cache::lock($name, $seconds);
+    }
+}
+```
+
+Now the application can use Redis tags in production without breaking local environments that still use the database cache driver.
+
+---
+
 ## Step 4 — Update DashboardService with Cache Tags
+
+Use `CacheService` in `DashboardService` so the cache stays workspace-scoped, TTL-driven, and safe when tags are unavailable:
+
+```php
+use App\Services\CacheService;
+
+class DashboardService
+{
+    public function __construct(
+        private readonly ClientRepositoryInterface $clients,
+        private readonly ProjectRepositoryInterface $projects,
+        private readonly InvoiceRepositoryInterface $invoices,
+        private readonly CacheService $cache,
+    ) {}
+
+    private function workspaceId(): int|null
+    {
+        return auth()->user()->currentWorkspace()?->id;
+    }
+
+    private function tags(string ...$extra): array
+    {
+        return [
+            'dashboard',
+            "workspace:{$this->workspaceId()}",
+            ...$extra,
+        ];
+    }
+
+    public function stats(): array
+    {
+        $workspaceId = $this->workspaceId();
+        $key = $this->cache->workspaceKey('dashboard:stats', $workspaceId);
+
+        return $this->cache->remember(
+            $this->tags(),
+            $key,
+            config('freelanceflow.cache.ttl.dashboard_stats'),
+            fn () => [
+                'total_clients' => Client::active()->count(),
+                'active_projects' => Project::active()->count(),
+                'unpaid_invoices' => Invoice::unpaid()->count(),
+                'overdue_invoices' => Invoice::overdue()->count(),
+                'total_revenue' => $this->invoices->totalRevenue(),
+                'revenue_this_month' => Invoice::paid()
+                    ->whereMonth('paid_at', now()->month)
+                    ->whereYear('paid_at', now()->year)
+                    ->sum('total'),
+            ],
+        );
+    }
+
+    public function revenueChart(int $months = 12): array
+    {
+        $workspaceId = $this->workspaceId();
+        $key = $this->cache->workspaceKey('dashboard:revenue_chart', $workspaceId, $months);
+
+        return $this->cache->remember(
+            $this->tags(),
+            $key,
+            config('freelanceflow.cache.ttl.revenue_chart'),
+            function () use ($months) {
+                $chart = $this->invoices->revenueByMonth($months);
+                $chart['total'] = array_sum($chart['data']);
+
+                return $chart;
+            },
+        );
+    }
+
+    public function projectStatusBreakdown(): array
+    {
+        $workspaceId = $this->workspaceId();
+        $key = $this->cache->workspaceKey('dashboard:project_status', $workspaceId);
+
+        return $this->cache->remember(
+            $this->tags('projects'),
+            $key,
+            config('freelanceflow.cache.ttl.project_status'),
+            fn () => $this->projects->statusBreakdown(),
+        );
+    }
+
+    public function recentActivity(): array
+    {
+        $workspaceId = $this->workspaceId();
+        $key = $this->cache->workspaceKey('dashboard:recent_activity', $workspaceId);
+
+        return $this->cache->remember(
+            $this->tags(),
+            $key,
+            config('freelanceflow.cache.ttl.recent_activity'),
+            fn () => [
+                'clients' => Client::latest()->limit(5)->get(),
+                'projects' => Project::with('client')->latest()->limit(5)->get(),
+                'invoices' => Invoice::with('client')->latest()->limit(5)->get(),
+            ],
+        );
+    }
+
+    public function bustCache(): void
+    {
+        $workspaceId = $this->workspaceId();
+
+        $this->cache->flush($this->tags(), [
+            $this->cache->workspaceKey('dashboard:stats', $workspaceId),
+            $this->cache->workspaceKey('dashboard:project_status', $workspaceId),
+            $this->cache->workspaceKey('dashboard:recent_activity', $workspaceId),
+            $this->cache->workspaceKey('dashboard:revenue_chart', $workspaceId, 3),
+            $this->cache->workspaceKey('dashboard:revenue_chart', $workspaceId, 6),
+            $this->cache->workspaceKey('dashboard:revenue_chart', $workspaceId, 12),
+        ]);
+    }
+}
+```
+
+The important changes are:
+
+- Keys use the workspace ID, not the user ID.
+- TTLs come from config instead of hardcoded `300`.
+- `projectStatusBreakdown()` and `recentActivity()` are cached too.
+- Fallback keys keep local database/file cache usable.
+
+The older raw `Cache::tags()` example below still shows the underlying idea, but the `CacheService` version is the production-safe pattern to use in the app.
 
 ```php
 <?php
@@ -622,12 +831,70 @@ if ($lock->get()) {
 
 ---
 
+## Production Fix — TTL and Connection Settings
+
+Add cache TTLs to `config/freelanceflow.php` so service code does not hardcode expiry values:
+
+```php
+'cache' => [
+    'ttl' => [
+        'dashboard_stats' => (int) env('CACHE_TTL_DASHBOARD_STATS', 300),
+        'revenue_chart' => (int) env('CACHE_TTL_REVENUE_CHART', 300),
+        'project_status' => (int) env('CACHE_TTL_PROJECT_STATUS', 300),
+        'recent_activity' => (int) env('CACHE_TTL_RECENT_ACTIVITY', 60),
+        'client_stats' => (int) env('CACHE_TTL_CLIENT_STATS', 300),
+        'client_record' => (int) env('CACHE_TTL_CLIENT_RECORD', 600),
+        'tag_list' => (int) env('CACHE_TTL_TAG_LIST', 3600),
+    ],
+],
+```
+
+Update `.env.example` with production-ready Redis settings:
+
+```env
+CACHE_STORE=redis
+SESSION_DRIVER=redis
+SESSION_CONNECTION=default
+QUEUE_CONNECTION=redis
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+REDIS_DB=0
+REDIS_CACHE_DB=1
+REDIS_CACHE_CONNECTION=cache
+REDIS_CACHE_LOCK_CONNECTION=default
+REDIS_QUEUE_CONNECTION=default
+REDIS_QUEUE=default
+REDIS_QUEUE_RETRY_AFTER=90
+REDIS_PERSISTENT=false
+REDIS_MAX_RETRIES=3
+REDIS_BACKOFF_ALGORITHM=decorrelated_jitter
+REDIS_BACKOFF_BASE=100
+REDIS_BACKOFF_CAP=1000
+```
+
+For high traffic production, prefer separate Redis databases or managed Redis instances for:
+
+- Cache data
+- Queue jobs
+- Sessions
+- Locks
+
+That separation prevents a busy queue or large cache from evicting sessions.
+
+---
+
 ## What We Learned Today
 
 - **Redis vs database cache** — Redis is an in-memory data store. Cache reads hit RAM, not disk. Orders of magnitude faster than MySQL for cache operations
 - **`CACHE_STORE=redis`** — switches Laravel's default cache driver to Redis. All existing `Cache::remember()` calls use Redis automatically
 - **Separate Redis databases** — `REDIS_DB=0` for application data, `REDIS_CACHE_DB=1` for cache. Lets you flush cache without touching sessions or queue jobs
 - **Cache tags** — group related cache entries. `Cache::tags(['dashboard', 'workspace:1'])->flush()` clears all dashboard cache for workspace 1 in one call. Requires Redis or Memcached — the database driver does not support tags
+- **Cache tag fallback** — wrap `Cache::tags()` in an app service so local database/file cache does not crash while production still gets Redis tags
+- **Workspace-scoped keys** — every cache key should include the workspace ID. Never mix user ID and workspace ID in dashboard cache keys
+- **Config-driven TTLs** — keep expiry values in `config/freelanceflow.php`, not scattered through services
 - **Model observers** — fire automatically on Eloquent lifecycle events. Bust cache in the observer instead of scattered `bustCache()` calls throughout service methods
 - **`Cache::lock()`** — distributed lock backed by Redis. Prevents race conditions when multiple queue workers or requests try to run the same expensive operation simultaneously
 - **`redis-cli MONITOR`** — logs every Redis command in real time. Invaluable for debugging cache key names and hit/miss patterns

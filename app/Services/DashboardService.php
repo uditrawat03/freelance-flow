@@ -36,7 +36,8 @@ class DashboardService
     {
         $workspaceId = $this->workspaceId();
 
-        return $this->cache()->remember("dashboard_stats_{$workspaceId}", 300, function () {
+        return $this->cache()
+            ->remember("dashboard_stats_{$workspaceId}", 300, function () {
             return [
                 'total_clients' => Client::active()->count(),
                 'active_projects' => Project::active()->count(),
