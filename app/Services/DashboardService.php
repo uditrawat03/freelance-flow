@@ -87,12 +87,17 @@ class DashboardService
 
     public function bustCache(): void
     {
+        $this->bustCacheForWorkspace($this->workspaceId());
+    }
+
+    public function bustCacheForWorkspace(int|null $workspaceId): void
+    {
         Cache::tags([
             'dashboard',
-            "workspace:{$this->workspaceId()}",
+            "workspace:{$workspaceId}",
         ])->flush();
 
-        Cache::forget("recent_activity_{$this->workspaceId()}");
+        Cache::forget("recent_activity_{$workspaceId}");
     
         // $workspaceId = $this->workspaceId();
 

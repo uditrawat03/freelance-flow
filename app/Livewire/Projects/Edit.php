@@ -6,9 +6,7 @@ use App\Models\Attachment;
 use App\Models\Client;
 use App\Models\Project;
 use App\Models\Tag;
-use App\Notifications\ProjectStatusChanged;
 use App\Services\ProjectService;
-use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
@@ -16,7 +14,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
-#[Title('Edit Project — FreelanceFlow')]
+#[Title('Edit Project - FreelanceFlow')]
 class Edit extends Component
 {
     use WithFileUploads;
@@ -44,23 +42,23 @@ class Edit extends Component
     #[Rule('nullable|array')]
     public array $selectedTags = [];
 
-    // File upload property — can be a single file or array for multiple
     #[Rule('nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,png,jpg,jpeg,gif,zip')]
     public $newFile = null;
 
-    public bool $confirmingDelete  = false;
+    public bool $confirmingDelete = false;
+
     public ?int $deletingAttachmentId = null;
 
     public function mount(Project $project): void
     {
-        $this->project           = $project;
-        $this->selectedClientId  = $project->client_id;
-        $this->name              = $project->name;
-        $this->description       = $project->description ?? '';
-        $this->status            = $project->status;
-        $this->budget            = $project->budget;
-        $this->deadline          = $project->deadline?->format('Y-m-d');
-        $this->selectedTags      = $project->tags->pluck('id')->toArray();
+        $this->project = $project;
+        $this->selectedClientId = $project->client_id;
+        $this->name = $project->name;
+        $this->description = $project->description ?? '';
+        $this->status = $project->status;
+        $this->budget = $project->budget;
+        $this->deadline = $project->deadline?->format('Y-m-d');
+        $this->selectedTags = $project->tags->pluck('id')->toArray();
     }
 
     public function updatedNewFile(): void
@@ -70,7 +68,7 @@ class Edit extends Component
 
     public function uploadFile(): void
     {
-        $maxSizeKb   = config('freelanceflow.uploads.max_size_kb', 10240);
+        $maxSizeKb = config('freelanceflow.uploads.max_size_kb', 10240);
         $allowedMimes = implode(',', config('freelanceflow.uploads.allowed_mimes', []));
 
         $this->validate([
@@ -86,15 +84,15 @@ class Edit extends Component
             return;
         }
 
-        $disk       = config('freelanceflow.uploads.disk', 'local');
+        $disk = config('freelanceflow.uploads.disk', 'local');
         $storedName = $this->newFile->store('attachments', $disk);
 
         $this->project->attachments()->create([
             'original_name' => $this->newFile->getClientOriginalName(),
-            'stored_name'   => $storedName,
-            'mime_type'     => $this->newFile->getMimeType(),
-            'size'          => $this->newFile->getSize(),
-            'disk'          => $disk,
+            'stored_name' => $storedName,
+            'mime_type' => $this->newFile->getMimeType(),
+            'size' => $this->newFile->getSize(),
+            'disk' => $disk,
         ]);
 
         $this->newFile = null;
@@ -107,24 +105,20 @@ class Edit extends Component
     public function confirmDeleteAttachment(int $attachmentId): void
     {
         $this->deletingAttachmentId = $attachmentId;
-        $this->confirmingDelete     = true;
+        $this->confirmingDelete = true;
     }
 
     public function deleteAttachment(): void
     {
         $attachment = Attachment::findOrFail($this->deletingAttachmentId);
 
-        // Ensure this attachment belongs to this project
         abort_if($attachment->project_id !== $this->project->id, 403);
 
-        // Delete file from disk first
         $attachment->deleteFromStorage();
-
-        // Then delete the database record
         $attachment->delete();
 
-        $this->confirmingDelete       = false;
-        $this->deletingAttachmentId   = null;
+        $this->confirmingDelete = false;
+        $this->deletingAttachmentId = null;
         $this->project->refresh();
 
         session()->flash('success', 'File removed.');
@@ -134,44 +128,28 @@ class Edit extends Component
     {
         $this->validate();
 
-        // Capture the status before saving
-        $previousStatus = $this->project->status;
-
         $projectService->update($this->project, [
-            'client_id'   => $this->selectedClientId,
-            'name'        => $this->name,
+            'client_id' => $this->selectedClientId,
+            'name' => $this->name,
             'description' => $this->description,
-            'status'      => $this->status,
-            'budget'      => $this->budget ?: null,
-            'deadline'    => $this->deadline ?: null,
-        ]);
-
-        $this->project->tags()->sync($this->selectedTags);
-
-         // Only notify if the status actually changed
-        if ($previousStatus !== $this->status) {
-            $this->project->loadMissing('client');
-            Log::info("Project status changed for Project ID {$this->project->id}: '{$previousStatus}' → '{$this->status}'");
-            // Notify the currently logged-in user
-            // In Phase 4 we extend this to notify the client too
-            auth()->user()->notify(
-                new ProjectStatusChanged($this->project, $previousStatus)
-            );
-        }
+            'status' => $this->status,
+            'budget' => $this->budget ?: null,
+            'deadline' => $this->deadline ?: null,
+        ], $this->selectedTags);
 
         session()->flash('success', 'Project updated successfully.');
 
         $this->redirect(
             route('clients.show', $this->project->client_id),
-            navigate: true
+            navigate: true,
         );
     }
 
     public function render()
     {
         return view('livewire.projects.edit', [
-            'clients'     => Client::active()->orderBy('name')->get(),
-            'tags'        => Tag::orderBy('name')->get(),
+            'clients' => Client::active()->orderBy('name')->get(),
+            'tags' => Tag::orderBy('name')->get(),
             'attachments' => $this->project->attachments()->latest()->get(),
         ]);
     }

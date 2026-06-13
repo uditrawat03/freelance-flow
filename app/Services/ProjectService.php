@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Events\ProjectCreated;
+use App\Events\ProjectStatusUpdated;
 use App\Models\Project;
 use App\Notifications\ProjectStatusChanged;
 use App\Repositories\Contracts\ProjectRepositoryInterface;
@@ -40,6 +41,8 @@ class ProjectService
             auth()->user()->notify(
                 new ProjectStatusChanged($updated, $previousStatus)
             );
+
+            event(ProjectStatusUpdated::fromProject($updated, $previousStatus));
         }
 
         return $updated;
