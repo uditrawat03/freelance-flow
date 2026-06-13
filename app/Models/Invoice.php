@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\AsEncryptedString;
 use App\Models\Scopes\BelongsToWorkspace;
 use App\Models\Scopes\OwnedByUser;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,7 +32,7 @@ class Invoice extends Model
                 $model->user_id = auth()->id();
             }
 
-            if (!$model->workspace_id) {
+            if (! $model->workspace_id) {
                 $workspace = auth()->user()->currentWorkspace();
                 $model->workspace_id = $workspace?->id;
             }
@@ -60,6 +61,7 @@ class Invoice extends Model
     ];
 
     protected $casts = [
+        'notes' => AsEncryptedString::class,
         'line_items' => 'array',    // JSON column auto-decoded
         'subtotal' => 'decimal:2',
         'tax_rate' => 'decimal:2',
@@ -119,7 +121,7 @@ class Invoice extends Model
     protected function statusLabel(): Attribute
     {
         return Attribute::make(
-            get: fn() => match ($this->status) {
+            get: fn () => match ($this->status) {
                 'draft' => 'Draft',
                 'sent' => 'Sent',
                 'paid' => 'Paid',
@@ -133,28 +135,28 @@ class Invoice extends Model
     protected function formattedSubtotal(): Attribute
     {
         return Attribute::make(
-            get: fn() => '₹' . number_format($this->subtotal, 2)
+            get: fn () => '₹'.number_format($this->subtotal, 2)
         );
     }
 
     protected function formattedTotal(): Attribute
     {
         return Attribute::make(
-            get: fn() => '₹' . number_format($this->total, 2)
+            get: fn () => '₹'.number_format($this->total, 2)
         );
     }
 
     protected function formattedTaxAmount(): Attribute
     {
         return Attribute::make(
-            get: fn() => '₹' . number_format($this->tax_amount, 2)
+            get: fn () => '₹'.number_format($this->tax_amount, 2)
         );
     }
 
     protected function isOverdue(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->status === 'sent'
+            get: fn () => $this->status === 'sent'
             && $this->due_at
             && $this->due_at->isPast()
         );
@@ -163,7 +165,7 @@ class Invoice extends Model
     protected function hasPdf(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->pdf_path
+            get: fn () => $this->pdf_path
             && Storage::disk('local')->exists($this->pdf_path)
         );
     }
@@ -176,6 +178,7 @@ class Invoice extends Model
         $prefix = config('freelanceflow.invoice.prefix');
         $year = now()->year;
         $count = static::whereYear('created_at', $year)->count() + 1;
+
         return sprintf('%s-%d-%03d', $prefix, $year, $count);
     }
 
@@ -183,7 +186,7 @@ class Invoice extends Model
     public function recalculate(): void
     {
         $subtotal = collect($this->line_items)
-            ->sum(fn($item) => $item['quantity'] * $item['rate']);
+            ->sum(fn ($item) => $item['quantity'] * $item['rate']);
 
         $taxAmount = $subtotal * ($this->tax_rate / 100);
 

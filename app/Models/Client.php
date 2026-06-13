@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\AsEncryptedString;
 use App\Models\Scopes\BelongsToWorkspace;
 use App\Models\Scopes\OwnedByUser;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,6 +44,7 @@ class Client extends Model
     ];
 
     protected $casts = [
+        'notes' => AsEncryptedString::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -113,11 +115,11 @@ class Client extends Model
     protected function statusLabel(): Attribute
     {
         return Attribute::make(
-            get: fn () => match($this->status) {
-                'active'   => 'Active',
+            get: fn () => match ($this->status) {
+                'active' => 'Active',
                 'inactive' => 'Inactive',
-                'lead'     => 'Lead',
-                default    => ucfirst($this->status),
+                'lead' => 'Lead',
+                default => ucfirst($this->status),
             },
         );
     }
