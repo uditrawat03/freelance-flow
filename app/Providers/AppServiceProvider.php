@@ -56,6 +56,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (class_exists(\Laravel\Dusk\Dusk::class)) {
+            \Laravel\Dusk\Dusk::register(['environments' => ['local', 'testing', 'dusk']]);
+        }
+
         if (app()->isProduction()) {
             $this->validateRequiredConfig();
         }

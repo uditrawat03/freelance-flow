@@ -15,31 +15,31 @@
             <div class="grid gap-5 md:grid-cols-2">
                 <flux:field>
                     <flux:label>Full name <span class="text-danger">*</span></flux:label>
-                    <flux:input wire:model.live="name" type="text" placeholder="Acme Corp or John Doe" autofocus />
+                    <flux:input wire:model.live="name" type="text" dusk="client-name" placeholder="Acme Corp or John Doe" autofocus />
                     <flux:error name="name" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>Email address <span class="text-danger">*</span></flux:label>
-                    <flux:input wire:model.live="email" type="email" placeholder="hello@acme.com" />
+                    <flux:input wire:model.live="email" type="email" dusk="client-email" placeholder="hello@acme.com" />
                     <flux:error name="email" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>Phone <span class="text-muted text-xs font-normal">(optional)</span></flux:label>
-                    <flux:input wire:model="phone" type="tel" placeholder="+91 98765 43210" />
+                    <flux:input wire:model="phone" type="tel" dusk="client-phone" placeholder="+91 98765 43210" />
                     <flux:error name="phone" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>Company <span class="text-muted text-xs font-normal">(optional)</span></flux:label>
-                    <flux:input wire:model="company" type="text" placeholder="Acme Inc." />
+                    <flux:input wire:model="company" type="text" dusk="client-company" placeholder="Acme Inc." />
                     <flux:error name="company" />
                 </flux:field>
 
                 <flux:field class="md:col-span-2">
                     <flux:label>Status <span class="text-danger">*</span></flux:label>
-                    <flux:select wire:model="status">
+                    <flux:select wire:model="status" dusk="client-status">
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                         <option value="lead">Lead</option>
@@ -52,7 +52,7 @@
         <section class="border-t border-border pt-5">
             <flux:field>
                 <flux:label>Notes <span class="text-muted text-xs font-normal">(optional)</span></flux:label>
-                <flux:textarea wire:model="notes" placeholder="Any notes about this client..." rows="4" />
+                <flux:textarea wire:model="notes" dusk="client-notes" placeholder="Any notes about this client..." rows="4" />
                 <flux:error name="notes" />
             </flux:field>
         </section>
@@ -62,7 +62,7 @@
                 Cancel
             </a>
 
-            <flux:button wire:click="save" wire:loading.attr="disabled" variant="primary">
+            <flux:button wire:click="save" wire:loading.attr="disabled" dusk="save-client" variant="primary">
                 <span wire:loading.remove wire:target="save">Save client</span>
                 <span wire:loading wire:target="save">Saving...</span>
             </flux:button>

@@ -84,14 +84,18 @@ class Edit extends Component
             return;
         }
 
+        $originalName = $this->newFile->getClientOriginalName();
+        $mimeType = $this->newFile->getMimeType();
+        $size = $this->newFile->getSize();
+
         $disk = config('freelanceflow.uploads.disk', 'local');
         $storedName = $this->newFile->store('attachments', $disk);
 
         $this->project->attachments()->create([
-            'original_name' => $this->newFile->getClientOriginalName(),
+            'original_name' => $originalName,
             'stored_name' => $storedName,
-            'mime_type' => $this->newFile->getMimeType(),
-            'size' => $this->newFile->getSize(),
+            'mime_type' => $mimeType,
+            'size' => $size,
             'disk' => $disk,
         ]);
 

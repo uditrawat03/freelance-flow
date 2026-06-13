@@ -10,6 +10,7 @@
             <flux:input
                 wire:model="email"
                 type="email"
+                dusk="email-input"
                 placeholder="you@example.com"
                 autofocus
                 autocomplete="email"
@@ -25,6 +26,7 @@
             <flux:input
                 wire:model="password"
                 type="password"
+                dusk="password-input"
                 placeholder="Password"
                 autocomplete="current-password"
             />
@@ -36,7 +38,7 @@
             <span>Remember me</span>
         </label>
 
-        <flux:button wire:click="login" wire:loading.attr="disabled" variant="primary" class="w-full">
+        <flux:button wire:click="login" wire:loading.attr="disabled" dusk="login-submit" variant="primary" class="w-full">
             <span wire:loading.remove>Sign in</span>
             <span wire:loading>Signing in...</span>
         </flux:button>

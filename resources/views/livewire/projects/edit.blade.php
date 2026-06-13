@@ -162,6 +162,7 @@
                 <input
                     type="file"
                     wire:model="newFile"
+                    dusk="project-file"
                     class="block w-full cursor-pointer rounded-lg border border-border bg-surface text-sm text-muted shadow-soft file:mr-4 file:border-0 file:bg-primary-soft file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-primary hover:file:bg-blue-100"
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip"
                 />
@@ -181,7 +182,7 @@
                             >
                                 Cancel
                             </button>
-                            <flux:button wire:click="uploadFile" wire:loading.attr="disabled" size="sm" variant="primary">
+                            <flux:button wire:click="uploadFile" wire:loading.attr="disabled" dusk="upload-project-file" size="sm" variant="primary">
                                 <span wire:loading.remove wire:target="uploadFile">Upload</span>
                                 <span wire:loading wire:target="uploadFile">Uploading...</span>
                             </flux:button>

@@ -94,3 +94,13 @@ Route::middleware('auth')->group(function () {
     )->name('attachments.download');
 
 });
+
+if (! app()->isProduction()) {
+    Route::get('/testing/set-workspace/{workspace}', function (\App\Models\Workspace $workspace) {
+        abort_unless(auth()->user()?->hasWorkspaceAccess($workspace), 403);
+
+        session(['current_workspace_id' => $workspace->id]);
+
+        return response('OK');
+    })->middleware('auth')->name('testing.set-workspace');
+}

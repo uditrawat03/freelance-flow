@@ -1,7 +1,7 @@
 <div class="relative" x-data>
 
     {{-- Bell button with unread badge --}}
-    <button wire:click="toggleOpen" class="relative p-2 text-gray-500 hover:text-gray-700 transition-colors"
+    <button wire:click="toggleOpen" dusk="notification-bell" class="relative p-2 text-gray-500 hover:text-gray-700 transition-colors"
         aria-label="Notifications">
         {{-- Bell icon --}}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,7 +12,8 @@
         {{-- Unread count badge --}}
         @if ($unreadCount > 0)
             <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white
-                             text-xs font-bold rounded-full flex items-center justify-center">
+                             text-xs font-bold rounded-full flex items-center justify-center"
+                dusk="notification-count">
                 {{ $unreadCount > 9 ? '9+' : $unreadCount }}
             </span>
         @endif

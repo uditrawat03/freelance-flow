@@ -13,7 +13,8 @@
         <div class="flex flex-col sm:flex-row sm:items-center gap-3">
             {{-- Live search input --}}
             <div class="relative flex-1">
-                <input wire:model.live.debounce.300ms="search" type="text" 
+                <input wire:model.live.debounce.300ms="search" type="text"
+                    dusk="client-search"
                     placeholder="Search by name, email or company..."
                     class="w-full text-sm border border-gray-200 rounded-xl pl-10 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300" />
                 {{-- Search icon --}}
@@ -24,7 +25,7 @@
                 </svg>
                 {{-- Clear search button --}}
                 @if ($search)
-                    <button wire:click="clearSearch" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 transition-colors"
+                    <button wire:click="clearSearch" dusk="clear-client-search" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 transition-colors"
                         aria-label="Clear search">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -36,7 +37,8 @@
             {{-- Status filter pills --}}
             <div class="flex items-center gap-2 shrink-0 flex-wrap">
                 @foreach (['' => 'All', 'active' => 'Active', 'inactive' => 'Inactive', 'lead' => 'Leads'] as $value => $label)
-                    <button wire:click="setStatus('{{ $value }}')" 
+                    <button wire:click="setStatus('{{ $value }}')"
+                        dusk="client-status-{{ $value ?: 'all' }}"
                         class="text-sm px-3 py-2 rounded-lg font-medium transition-colors whitespace-nowrap
                             {{ $status === $value
                             ? 'bg-indigo-600 text-white'

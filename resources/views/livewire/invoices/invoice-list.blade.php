@@ -82,6 +82,7 @@
                         {{-- Generate/Download PDF --}}
                         @if (!$invoice->has_pdf)
                             <button wire:click="confirmGenerate({{ $invoice->id }})"
+                                dusk="generate-invoice-pdf-{{ $invoice->id }}"
                                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
                                 title="Generate PDF">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,6 +91,7 @@
                             </button>
                         @else
                             <a href="{{ route('invoices.download', $invoice) }}"
+                                dusk="download-invoice-pdf-{{ $invoice->id }}"
                                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
                                 title="Download PDF">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +163,7 @@
                 You can download or send it to the client afterwards.
             </p>
             <div class="flex items-center gap-3">
-                <flux:button wire:click="generatePdf" wire:loading.attr="disabled" variant="primary" class="flex-1">
+                <flux:button wire:click="generatePdf" wire:loading.attr="disabled" dusk="confirm-generate-invoice-pdf" variant="primary" class="flex-1">
                     <span wire:loading.remove wire:target="generatePdf">Generate</span>
                     <span wire:loading wire:target="generatePdf">Generating...</span>
                 </flux:button>
