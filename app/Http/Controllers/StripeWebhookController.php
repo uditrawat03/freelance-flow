@@ -65,6 +65,7 @@ class StripeWebhookController extends Controller
         }
 
         $invoice->markAsPaid();
+        $invoice->update(['stripe_payment_status' => 'succeeded']);
 
         $this->logger->payment('Invoice marked as paid via Stripe webhook', [
             'invoice_id'        => $invoice->id,
