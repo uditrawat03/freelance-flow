@@ -16,13 +16,19 @@ Route::middleware([ForceJsonResponse::class])->prefix('v1')->as('api.')->group(f
     // --- Protected ---
     Route::middleware('auth:sanctum')->group(function () {
 
-        Route::post('tokens/revoke', [AuthController::class, 'revokeToken']);
+        Route::post('tokens/revoke', [AuthController::class, 'revokeToken'])
+            ->middleware('throttle:api');
 
-        Route::middleware('throttle:api')->group(function () {
-            Route::apiResource('clients', ClientController::class);
-            Route::apiResource('projects', ProjectController::class);
+        Route::middleware('throttle:api-reads')->group(function () {
+            Route::apiResource('clients', ClientController::class)->only(['index', 'show']);
+            Route::apiResource('projects', ProjectController::class)->only(['index', 'show']);
             Route::get('tags', [TagController::class, 'index']);
             Route::get('tags/{tag}', [TagController::class, 'show']);
+        });
+
+        Route::middleware('throttle:api')->group(function () {
+            Route::apiResource('clients', ClientController::class)->except(['index', 'show']);
+            Route::apiResource('projects', ProjectController::class)->except(['index', 'show']);
         });
 
     });

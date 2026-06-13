@@ -58,6 +58,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | API Rate Limits
+    |--------------------------------------------------------------------------
+    */
+
+    'rate_limits' => [
+        'api' => [
+            'authenticated_per_minute' => (int) env('API_RATE_LIMIT_AUTHENTICATED', 60),
+            'guest_per_minute' => (int) env('API_RATE_LIMIT_GUEST', 30),
+        ],
+
+        'api_reads' => [
+            'authenticated_per_minute' => (int) env('API_READ_RATE_LIMIT_AUTHENTICATED', 120),
+            'guest_per_minute' => (int) env('API_READ_RATE_LIMIT_GUEST', 30),
+        ],
+
+        'token_creation' => [
+            'per_minute' => (int) env('TOKEN_CREATION_RATE_LIMIT', 5),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Workspace Settings
     |--------------------------------------------------------------------------
     */
