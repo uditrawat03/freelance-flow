@@ -79,6 +79,9 @@ return Application::configure(basePath: dirname(__DIR__))
                     $e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException =>
                     response()->json(['success' => false, 'message' => 'Resource not found.'], 404),
 
+                    $e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException =>
+                    response()->json(['success' => false, 'message' => 'Resource not found.'], 404),
+
                     $e instanceof \Illuminate\Validation\ValidationException =>
                     response()->json([
                         'success' => false,

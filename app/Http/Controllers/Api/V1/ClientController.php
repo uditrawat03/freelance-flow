@@ -65,9 +65,9 @@ class ClientController extends Controller
     {
         $client->load(['projects' => fn ($q) => $q->with('tags')->latest()]);
 
-        return ApiResponse::created(
+        return ApiResponse::success(
             new ClientResource($client),
-            'Client created successfully.'
+            'Client retrieved successfully.'
         );
     }
 
@@ -88,9 +88,9 @@ class ClientController extends Controller
 
         $client->update($validated);
 
-        return ApiResponse::created(
+        return ApiResponse::success(
             new ClientResource($client),
-            'Client created successfully.'
+            'Client updated successfully.'
         );
     }
 

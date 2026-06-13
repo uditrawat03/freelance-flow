@@ -23,7 +23,15 @@ class Invoice extends Model
 
         // Auto-assign user_id on creation
         static::creating(function (self $model) {
-            if (auth()->check() && !$model->workspace_id) {
+            if (! auth()->check()) {
+                return;
+            }
+
+            if (! $model->user_id) {
+                $model->user_id = auth()->id();
+            }
+
+            if (!$model->workspace_id) {
                 $workspace = auth()->user()->currentWorkspace();
                 $model->workspace_id = $workspace?->id;
             }

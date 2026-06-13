@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Events\ProjectCreated;
 use App\Events\ProjectStatusUpdated;
 use App\Models\Project;
 use App\Notifications\ProjectStatusChanged;
@@ -23,8 +22,6 @@ class ProjectService
         if (!empty($tagIds)) {
             $project->tags()->sync($tagIds);
         }
-
-        ProjectCreated::dispatch($project);
 
         return $project;
     }
