@@ -3,21 +3,26 @@
 // routes/web.php — complete verified structure
 
 use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Http\Middleware\EnsureTwoFactorAuthenticated;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
+use App\Livewire\Auth\TwoFactorChallenge;
+use App\Livewire\Clients\ClientList;
 use App\Livewire\Clients\Create as CreateClient;
 use App\Livewire\Clients\Edit as EditClient;
 use App\Livewire\Dashboard;
 use App\Livewire\Invoices\Create as CreateInvoice;
 use App\Livewire\Invoices\InvoiceList;
-use App\Livewire\Clients\ClientList;
 use App\Livewire\Projects\Create as CreateProject;
 use App\Livewire\Projects\Edit as EditProject;
+use App\Livewire\Settings\Index as SettingsIndex;
 use App\Livewire\Workspaces\Create as CreateWorkspace;
+use App\Models\Workspace;
 use Illuminate\Support\Facades\Route;
 
 // -------------------------------------------------------
@@ -35,8 +40,13 @@ Route::post('/logout', function () {
     auth()->logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
+
     return redirect('/login');
 })->middleware('auth')->name('logout');
+
+Route::get('/two-factor-challenge', TwoFactorChallenge::class)
+    ->middleware('auth')
+    ->name('two-factor.challenge');
 
 // -------------------------------------------------------
 // Stripe webhook — public, CSRF excluded
@@ -59,11 +69,14 @@ Route::get(
 // -------------------------------------------------------
 // Authenticated routes
 // -------------------------------------------------------
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', EnsureTwoFactorAuthenticated::class])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
-    Route::get('/', fn() => redirect()->route('dashboard'));
+    Route::get('/', fn () => redirect()->route('dashboard'));
+
+    // Settings
+    Route::get('/settings', SettingsIndex::class)->name('settings.index');
 
     // Workspace
     Route::get('/workspaces/create', CreateWorkspace::class)->name('workspaces.create');
@@ -71,7 +84,7 @@ Route::middleware('auth')->group(function () {
     // Clients
     Route::get('/clients', ClientList::class)->name('clients.index');
     Route::get('/clients/create', CreateClient::class)->name('clients.create');
-    Route::get('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'show'])->name('clients.show');
+    Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
     Route::get('/clients/{client}/edit', EditClient::class)->name('clients.edit');
 
     // Projects
@@ -96,7 +109,7 @@ Route::middleware('auth')->group(function () {
 });
 
 if (! app()->isProduction()) {
-    Route::get('/testing/set-workspace/{workspace}', function (\App\Models\Workspace $workspace) {
+    Route::get('/testing/set-workspace/{workspace}', function (Workspace $workspace) {
         abort_unless(auth()->user()?->hasWorkspaceAccess($workspace), 403);
 
         session(['current_workspace_id' => $workspace->id]);

@@ -31,6 +31,17 @@ class Login extends Component
 
         session()->regenerate();
 
+        if (Auth::user()->hasTwoFactorEnabled()) {
+            session([
+                'two_factor_intended' => route('dashboard'),
+                'two_factor_verified' => false,
+            ]);
+
+            $this->redirect(route('two-factor.challenge'), navigate: true);
+
+            return;
+        }
+
         $this->redirect(route('dashboard'), navigate: true);
     }
 

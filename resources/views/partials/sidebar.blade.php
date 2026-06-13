@@ -220,6 +220,22 @@
                     <span>Documentation</span>
                 </a>
             </nav>
+
+            {{-- Settings section --}}
+            <div class="border-t border-border pt-6">
+                <a href="{{ route('settings.index') }}" 
+                   @click="sidebarOpen = false"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200
+                       {{ request()->routeIs('settings.*') 
+                           ? 'bg-primary-soft text-primary-hover shadow-sm' 
+                           : 'text-muted hover:text-secondary hover:bg-surface-muted' }}">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m3.08 3.08l4.24 4.24M1 12h6m6 0h6m-1.78 7.78l-4.24-4.24m-3.08-3.08l-4.24-4.24"></path>
+                    </svg>
+                    <span>Settings</span>
+                </a>
+            </div>
         </div>
     </aside>
 </div>
