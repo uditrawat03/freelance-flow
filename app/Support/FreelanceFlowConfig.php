@@ -1,7 +1,11 @@
 <?php
 
 // app/Support/FreelanceFlowConfig.php
+
 namespace App\Support;
+
+use Carbon\CarbonInterface;
+use NumberFormatter;
 
 class FreelanceFlowConfig
 {
@@ -22,7 +26,49 @@ class FreelanceFlowConfig
 
     public static function currencySymbol(): string
     {
-        return config('freelanceflow.invoice.currency_symbol', '₹');
+        return config('freelanceflow.invoice.currency_symbol', 'INR');
+    }
+
+    public static function currencyCode(): string
+    {
+        return config('freelanceflow.invoice.currency', 'INR');
+    }
+
+    public static function formatCurrency(float|int $amount, ?string $locale = null, ?string $currency = null): string
+    {
+        $locale ??= app()->getLocale();
+        $currency ??= self::currencyCode();
+
+        if (class_exists(NumberFormatter::class)) {
+            $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
+            $formatted = $formatter->formatCurrency($amount, $currency);
+
+            if ($formatted !== false) {
+                return $formatted;
+            }
+        }
+
+        return sprintf('%s %s', $currency, number_format((float) $amount, 2));
+    }
+
+    public static function formatDate(CarbonInterface $date, ?string $locale = null): string
+    {
+        return $date->locale($locale ?? app()->getLocale())->isoFormat('LL');
+    }
+
+    public static function formatDateShort(CarbonInterface $date, ?string $locale = null): string
+    {
+        return $date->locale($locale ?? app()->getLocale())->isoFormat('L');
+    }
+
+    public static function supportedLocales(): array
+    {
+        return config('freelanceflow.locales.supported', ['en']);
+    }
+
+    public static function localeName(string $locale): string
+    {
+        return config("freelanceflow.locales.names.{$locale}", $locale);
     }
 
     public static function uploadMaxSizeKb(): int

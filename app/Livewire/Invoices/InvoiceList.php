@@ -45,7 +45,7 @@ class InvoiceList extends Component
         $this->confirmingGenerate = false;
         $this->generatingInvoiceId = null;
 
-        session()->flash('success', "PDF generated for invoice {$invoice->number}.");
+        session()->flash('success', __('app.invoices.pdf_generated', ['number' => $invoice->number]));
     }
 
     // --- Mark as sent ---
@@ -54,7 +54,7 @@ class InvoiceList extends Component
         $invoice = Invoice::findOrFail($invoiceId);
         $invoice->markAsSent();
 
-        session()->flash('success', "Invoice {$invoice->number} marked as sent.");
+        session()->flash('success', __('app.invoices.marked_sent', ['number' => $invoice->number]));
     }
 
     // --- Mark as paid ---
@@ -63,7 +63,7 @@ class InvoiceList extends Component
         $invoice = Invoice::findOrFail($invoiceId);
         $invoice->markAsPaid();
 
-        session()->flash('success', "Invoice {$invoice->number} marked as paid.");
+        session()->flash('success', __('app.invoices.marked_paid', ['number' => $invoice->number]));
     }
 
     // --- Delete ---
@@ -82,7 +82,7 @@ class InvoiceList extends Component
         $this->confirmingDelete = false;
         $this->deletingInvoiceId = null;
 
-        session()->flash('success', 'Invoice deleted.');
+        session()->flash('success', __('app.invoices.deleted'));
     }
 
     public function render()

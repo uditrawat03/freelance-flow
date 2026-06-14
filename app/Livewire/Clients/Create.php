@@ -63,7 +63,7 @@ class Create extends Component
 
         $clientService->bustCache();
 
-        session()->flash('success', 'Client added successfully.');
+        session()->flash('success', __('app.clients.saved'));
         $this->redirect(route('clients.index'), navigate: true);
     }
 

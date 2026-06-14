@@ -4,7 +4,7 @@
     <div class="flex flex-col gap-6 py-6 px-4 overflow-y-auto flex-1">
         {{-- Workspace section --}}
         <div class="px-2">
-            <div class="text-xs text-muted font-semibold uppercase tracking-wide mb-3">Workspace</div>
+            <div class="text-xs text-muted font-semibold uppercase tracking-wide mb-3">{{ __('app.nav.workspace') }}</div>
             <livewire:workspace-switcher />
         </div>
 
@@ -21,7 +21,7 @@
                     <rect x="14" y="14" width="7" height="7" />
                     <rect x="3" y="14" width="7" height="7" />
                 </svg>
-                <span>Dashboard</span>
+                <span>{{ __('app.nav.dashboard') }}</span>
             </a>
 
             <a href="{{ route('clients.index') }}" 
@@ -35,7 +35,7 @@
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
-                <span>Clients</span>
+                <span>{{ __('app.nav.clients') }}</span>
             </a>
 
             <a href="{{ route('projects.create') }}" 
@@ -46,7 +46,7 @@
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="12 2 15.09 10.26 24 12.52 18 18.77 19.54 28 12 24.27 4.46 28 6 18.77 0 12.52 8.91 10.26 12 2"></polygon>
                 </svg>
-                <span>Projects</span>
+                <span>{{ __('app.nav.projects') }}</span>
             </a>
 
             <a href="{{ route('invoices.index') }}" 
@@ -60,7 +60,7 @@
                     <line x1="9" y1="14" x2="15" y2="14"></line>
                     <line x1="9" y1="18" x2="15" y2="18"></line>
                 </svg>
-                <span>Invoices</span>
+                <span>{{ __('app.nav.invoices') }}</span>
             </a>
         </nav>
 
@@ -75,7 +75,7 @@
                     <circle cx="12" cy="5" r="1"></circle>
                     <circle cx="12" cy="19" r="1"></circle>
                 </svg>
-                <span>Reports</span>
+                <span>{{ __('app.nav.reports') }}</span>
             </button>
 
             <a href="#" 
@@ -85,19 +85,22 @@
                     <polyline points="17 21 17 13 7 13 7 21"></polyline>
                     <polyline points="7 3 7 8 15 8"></polyline>
                 </svg>
-                <span>Documentation</span>
+                <span>{{ __('app.nav.documentation') }}</span>
             </a>
         </nav>
 
         {{-- Settings section at bottom --}}
         <div class="mt-auto pt-6 border-t border-border">
-            <a href="#" 
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-secondary hover:bg-surface-muted transition-all duration-200">
+            <a href="{{ route('settings.index') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200
+                   {{ request()->routeIs('settings.*') 
+                       ? 'bg-primary-soft text-primary-hover shadow-sm' 
+                       : 'text-muted hover:text-secondary hover:bg-surface-muted' }}">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="3"></circle>
                     <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m3.08 3.08l4.24 4.24M1 12h6m6 0h6m-1.78 7.78l-4.24-4.24m-3.08-3.08l-4.24-4.24"></path>
                 </svg>
-                <span>Settings</span>
+                <span>{{ __('app.nav.settings') }}</span>
             </a>
 
             <a href="#" 
@@ -106,7 +109,7 @@
                     <circle cx="12" cy="12" r="10"></circle>
                     <path d="M12 6v6l4 2"></path>
                 </svg>
-                <span>Help & Support</span>
+                <span>{{ __('app.nav.support') }}</span>
             </a>
         </div>
     </div>
@@ -132,7 +135,7 @@
         <div class="flex flex-col gap-6 py-6 px-4">
             {{-- Workspace section --}}
             <div class="px-2">
-                <div class="text-xs text-muted font-semibold uppercase tracking-wide mb-3">Workspace</div>
+                <div class="text-xs text-muted font-semibold uppercase tracking-wide mb-3">{{ __('app.nav.workspace') }}</div>
                 <livewire:workspace-switcher />
             </div>
 
@@ -150,7 +153,7 @@
                         <rect x="14" y="14" width="7" height="7" />
                         <rect x="3" y="14" width="7" height="7" />
                     </svg>
-                    <span>Dashboard</span>
+                    <span>{{ __('app.nav.dashboard') }}</span>
                 </a>
 
                 <a href="{{ route('clients.index') }}" 
@@ -165,7 +168,7 @@
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
-                    <span>Clients</span>
+                    <span>{{ __('app.nav.clients') }}</span>
                 </a>
 
                 <a href="{{ route('projects.create') }}" 
@@ -177,7 +180,7 @@
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="12 2 15.09 10.26 24 12.52 18 18.77 19.54 28 12 24.27 4.46 28 6 18.77 0 12.52 8.91 10.26 12 2"></polygon>
                     </svg>
-                    <span>Projects</span>
+                    <span>{{ __('app.nav.projects') }}</span>
                 </a>
 
                 <a href="{{ route('invoices.index') }}" 
@@ -192,7 +195,7 @@
                         <line x1="9" y1="14" x2="15" y2="14"></line>
                         <line x1="9" y1="18" x2="15" y2="18"></line>
                     </svg>
-                    <span>Invoices</span>
+                    <span>{{ __('app.nav.invoices') }}</span>
                 </a>
             </nav>
 
@@ -207,7 +210,7 @@
                         <circle cx="12" cy="5" r="1"></circle>
                         <circle cx="12" cy="19" r="1"></circle>
                     </svg>
-                    <span>Reports</span>
+                    <span>{{ __('app.nav.reports') }}</span>
                 </button>
 
                 <a href="#" 
@@ -217,7 +220,7 @@
                         <polyline points="17 21 17 13 7 13 7 21"></polyline>
                         <polyline points="7 3 7 8 15 8"></polyline>
                     </svg>
-                    <span>Documentation</span>
+                    <span>{{ __('app.nav.documentation') }}</span>
                 </a>
             </nav>
 
@@ -233,7 +236,7 @@
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m3.08 3.08l4.24 4.24M1 12h6m6 0h6m-1.78 7.78l-4.24-4.24m-3.08-3.08l-4.24-4.24"></path>
                     </svg>
-                    <span>Settings</span>
+                    <span>{{ __('app.nav.settings') }}</span>
                 </a>
             </div>
         </div>

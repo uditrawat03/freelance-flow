@@ -23,7 +23,7 @@ use Laravel\Sanctum\HasApiTokens;
 use PragmaRX\Google2FA\Google2FA;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
@@ -80,6 +80,24 @@ class User extends Authenticatable
     public function hasWorkspaceAccess(Workspace $workspace): bool
     {
         return $this->workspaces()->where('workspace_id', $workspace->id)->exists();
+    }
+
+    public function setLocale(string $locale): void
+    {
+        if (! in_array($locale, config('freelanceflow.locales.supported', ['en']), true)) {
+            return;
+        }
+
+        $this->forceFill(['locale' => $locale])->save();
+    }
+
+    public function getLocale(): string
+    {
+        $locale = $this->locale ?: config('app.locale', 'en');
+
+        return in_array($locale, config('freelanceflow.locales.supported', ['en']), true)
+            ? $locale
+            : config('app.locale', 'en');
     }
 
     public function hasTwoFactorEnabled(): bool
