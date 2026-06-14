@@ -1,0 +1,230 @@
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+type Query {
+    me: User @auth @guard
+
+    currentWorkspace: Workspace
+        @guard
+        @field(resolver: "App\\GraphQL\\Queries\\CurrentWorkspace")
+
+    dashboardStats: DashboardStats!
+        @guard
+        @field(resolver: "App\\GraphQL\\Queries\\DashboardStats")
+
+    clients(
+        first: Int = 15
+        page: Int
+        orderBy: [OrderByClause!] @orderBy(columns: ["id", "name", "email", "status", "created_at", "updated_at"])
+    ): [Client!]!
+        @guard
+        @paginate(model: "App\\Models\\Client", defaultCount: 15, maxCount: 100)
+
+    client(id: ID! @eq): Client
+        @guard
+        @find(model: "App\\Models\\Client")
+
+    projects(
+        first: Int = 15
+        page: Int
+        orderBy: [OrderByClause!] @orderBy(columns: ["id", "name", "status", "budget", "deadline", "created_at", "updated_at"])
+    ): [Project!]!
+        @guard
+        @paginate(model: "App\\Models\\Project", defaultCount: 15, maxCount: 100)
+
+    project(id: ID! @eq): Project
+        @guard
+        @find(model: "App\\Models\\Project")
+
+    invoices(
+        first: Int = 15
+        page: Int
+        orderBy: [OrderByClause!] @orderBy(columns: ["id", "number", "status", "total", "issued_at", "due_at", "created_at", "updated_at"])
+    ): [Invoice!]!
+        @guard
+        @paginate(model: "App\\Models\\Invoice", defaultCount: 15, maxCount: 100)
+
+    invoice(id: ID! @eq): Invoice
+        @guard
+        @find(model: "App\\Models\\Invoice")
+
+    tags: [Tag!]!
+        @guard
+        @all(model: "App\\Models\\Tag")
+}
+
+type Mutation {
+    login(email: String!, password: String!, device_name: String!): AuthPayload!
+        @field(resolver: "App\\GraphQL\\Mutations\\Login")
+
+    logout: Boolean!
+        @guard
+        @field(resolver: "App\\GraphQL\\Mutations\\Logout")
+
+    createInvoice(input: CreateInvoiceInput!): Invoice!
+        @guard
+        @field(resolver: "App\\GraphQL\\Mutations\\CreateInvoice")
+}
+
+type AuthPayload {
+    token: String!
+    type: String!
+    user: User!
+}
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    locale: String
+    created_at: DateTime!
+    updated_at: DateTime!
+    workspaces: [Workspace!]! @belongsToMany
+}
+
+type Workspace {
+    id: ID!
+    name: String!
+    slug: String!
+    plan: String!
+    owner: User! @belongsTo
+    users: [User!]! @belongsToMany
+    clients_count: Int! @count(relation: "clients")
+    projects_count: Int! @count(relation: "projects")
+    invoices_count: Int! @count(relation: "invoices")
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Client {
+    id: ID!
+    name: String!
+    email: String!
+    phone: String
+    company: String
+    status: ClientStatus!
+    status_label: String!
+    display_name: String!
+    projects: [Project!]! @hasMany
+    projects_count: Int! @count(relation: "projects")
+    invoices: [Invoice!]! @hasMany
+    invoices_count: Int! @count(relation: "invoices")
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Project {
+    id: ID!
+    name: String!
+    description: String
+    status: ProjectStatus!
+    status_label: String!
+    budget: Float
+    formatted_budget: String!
+    deadline: Date
+    is_overdue: Boolean!
+    client: Client! @belongsTo
+    tags: [Tag!]! @belongsToMany
+    attachments: [Attachment!]! @hasMany
+    invoices: [Invoice!]! @hasMany
+    invoices_count: Int! @count(relation: "invoices")
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Tag {
+    id: ID!
+    name: String!
+    slug: String!
+    colour: String!
+    projects_count: Int! @count(relation: "projects")
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Attachment {
+    id: ID!
+    original_name: String!
+    mime_type: String!
+    size: Int!
+    formatted_size: String!
+    extension: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Invoice {
+    id: ID!
+    number: String!
+    status: InvoiceStatus!
+    status_label: String!
+    notes: String
+    line_items: [InvoiceLineItem!]!
+    subtotal: Float!
+    tax_rate: Float!
+    tax_amount: Float!
+    total: Float!
+    formatted_total: String!
+    issued_at: Date
+    due_at: Date
+    paid_at: Date
+    is_overdue: Boolean!
+    has_pdf: Boolean!
+    client: Client! @belongsTo
+    project: Project @belongsTo
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type InvoiceLineItem {
+    description: String!
+    quantity: Float!
+    rate: Float!
+}
+
+type DashboardStats {
+    total_clients: Int!
+    active_projects: Int!
+    unpaid_invoices: Int!
+    overdue_invoices: Int!
+    total_revenue: Float!
+    revenue_this_month: Float!
+}
+
+enum ClientStatus {
+    active
+    inactive
+    lead
+}
+
+enum ProjectStatus {
+    draft
+    active
+    on_hold
+    completed
+    cancelled
+}
+
+enum InvoiceStatus {
+    draft
+    sent
+    paid
+    overdue
+    cancelled
+}
+
+input CreateInvoiceInput {
+    client_id: ID!
+    project_id: ID
+    notes: String
+    tax_rate: Float
+    issued_at: Date
+    due_at: Date
+    line_items: [LineItemInput!]!
+}
+
+input LineItemInput {
+    description: String!
+    quantity: Float!
+    rate: Float!
+}
