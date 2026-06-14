@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
 use Laravel\Horizon\Contracts\MasterSupervisorRepository;
+use Laravel\Telescope\Telescope;
 
 // Check overdue invoices every morning at 7am
 Schedule::command('invoice:check-overdue')
@@ -47,6 +48,13 @@ Schedule::command('cache:warm')
 // Prune stale queue jobs older than 48 hours
 Schedule::command('queue:prune-failed --hours=48')
     ->daily();
+
+if (class_exists(Telescope::class)) {
+    Schedule::command('telescope:prune --hours=48')
+        ->daily()
+        ->withoutOverlapping()
+        ->when(fn () => app()->isLocal() || (bool) config('telescope.enabled'));
+}
 
 Schedule::command('horizon:snapshot')
     ->everyFiveMinutes()

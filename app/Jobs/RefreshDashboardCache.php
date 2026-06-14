@@ -46,4 +46,16 @@ class RefreshDashboardCache implements ShouldQueue
             session()->forget('current_workspace_id');
         }
     }
+
+    /**
+     * @return array<int, string>
+     */
+    public function tags(): array
+    {
+        return [
+            'workspace:'.$this->workspaceId,
+            'queue:low',
+            'type:dashboard-cache-refresh',
+        ];
+    }
 }

@@ -61,6 +61,20 @@ class SendProjectNotification implements ShouldQueue
         ]);
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public function tags(): array
+    {
+        return [
+            'project:'.$this->project->id,
+            'client:'.$this->project->client_id,
+            'workspace:'.$this->project->workspace_id,
+            'queue:emails',
+            'type:project-notification',
+        ];
+    }
+
     // Called when the job fails after all retries
     public function failed(\Throwable $exception): void
     {
