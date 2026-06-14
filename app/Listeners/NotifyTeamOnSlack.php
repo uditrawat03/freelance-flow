@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Http;
 
 class NotifyTeamOnSlack implements ShouldQueue
 {
+    public string $queue = 'notifications';
+
     public function handle(ProjectCreated $event): void
     {
         // Send Slack notification

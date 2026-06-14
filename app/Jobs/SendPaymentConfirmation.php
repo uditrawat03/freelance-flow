@@ -14,7 +14,7 @@ class SendPaymentConfirmation implements ShouldQueue
      */
     public function __construct()
     {
-        //
+        $this->onQueue('emails');
     }
 
     /**

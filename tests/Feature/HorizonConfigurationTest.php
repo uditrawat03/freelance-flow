@@ -2,11 +2,19 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\GenerateInvoicePdf;
 use App\Jobs\RefreshDashboardCache;
+use App\Jobs\SendInvoiceEmail;
+use App\Jobs\SendPaymentConfirmation;
 use App\Jobs\SendProjectNotification;
+use App\Jobs\SendProjectStatusNotification;
+use App\Listeners\NotifyTeamOnSlack;
 use App\Mail\InvoicePaymentReminder;
+use App\Mail\InvoiceSent;
 use App\Mail\MonthlyRevenueReport;
+use App\Mail\PaymentReceived;
 use App\Mail\ProjectCreated as ProjectCreatedMail;
+use App\Mail\ProjectStatusChanged as ProjectStatusChangedMail;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\Workspace;
@@ -37,7 +45,12 @@ class HorizonConfigurationTest extends TestCase
         $project = Project::factory()->create();
 
         $this->assertSame('emails', (new SendProjectNotification($project))->queue);
+        $this->assertSame('emails', (new SendInvoiceEmail)->queue);
+        $this->assertSame('emails', (new SendPaymentConfirmation)->queue);
+        $this->assertSame('notifications', (new SendProjectStatusNotification)->queue);
+        $this->assertSame('notifications', (new NotifyTeamOnSlack)->queue);
         $this->assertSame('low', (new RefreshDashboardCache((int) $project->workspace_id))->queue);
+        $this->assertSame('low', (new GenerateInvoicePdf)->queue);
     }
 
     public function test_it_routes_queued_mail_and_notifications_to_dedicated_queues(): void
@@ -48,8 +61,21 @@ class HorizonConfigurationTest extends TestCase
 
         $this->assertSame('emails', (new ProjectCreatedMail($project))->queue);
         $this->assertSame('emails', (new InvoicePaymentReminder($invoice))->queue);
+        $this->assertSame('emails', (new InvoiceSent)->queue);
         $this->assertSame('emails', (new MonthlyRevenueReport($workspace, [], Carbon::now()))->queue);
+        $this->assertSame('emails', (new PaymentReceived)->queue);
+        $this->assertSame('emails', (new ProjectStatusChangedMail)->queue);
         $this->assertSame('notifications', (new ProjectStatusChanged($project, 'pending'))->queue);
         $this->assertSame('notifications', (new InvoiceOverdue($invoice))->queue);
+    }
+
+    public function test_local_and_testing_keep_four_supervisors_for_queue_isolation(): void
+    {
+        foreach (['local', 'testing'] as $environment) {
+            $this->assertArrayHasKey('supervisor-default', config("horizon.environments.{$environment}"));
+            $this->assertArrayHasKey('supervisor-emails', config("horizon.environments.{$environment}"));
+            $this->assertArrayHasKey('supervisor-notifications', config("horizon.environments.{$environment}"));
+            $this->assertArrayHasKey('supervisor-low', config("horizon.environments.{$environment}"));
+        }
     }
 }

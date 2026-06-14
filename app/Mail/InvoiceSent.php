@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class InvoiceSent extends Mailable
+class InvoiceSent extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -19,7 +19,7 @@ class InvoiceSent extends Mailable
      */
     public function __construct()
     {
-        //
+        $this->onQueue('emails');
     }
 
     /**

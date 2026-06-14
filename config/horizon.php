@@ -111,18 +111,36 @@ return [
         ],
         'local' => [
             'supervisor-default' => [
-                'queue' => ['default', 'emails', 'notifications', 'low'],
                 'balance' => 'simple',
-                'processes' => 3,
-                'maxProcesses' => 3,
+                'maxProcesses' => 2,
+            ],
+            'supervisor-emails' => [
+                'balance' => 'simple',
+                'maxProcesses' => 2,
+            ],
+            'supervisor-notifications' => [
+                'balance' => 'simple',
+                'maxProcesses' => 2,
+            ],
+            'supervisor-low' => [
+                'processes' => 1,
             ],
         ],
         'testing' => [
             'supervisor-default' => [
-                'queue' => ['default', 'emails', 'notifications', 'low'],
                 'balance' => 'simple',
-                'processes' => 1,
                 'maxProcesses' => 1,
+            ],
+            'supervisor-emails' => [
+                'balance' => 'simple',
+                'maxProcesses' => 1,
+            ],
+            'supervisor-notifications' => [
+                'balance' => 'simple',
+                'maxProcesses' => 1,
+            ],
+            'supervisor-low' => [
+                'processes' => 1,
             ],
         ],
     ],
