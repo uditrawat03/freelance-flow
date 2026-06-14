@@ -2,45 +2,65 @@
 
 namespace Database\Seeders;
 
+use App\Models\Project;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(RoleAndPermissionSeeder::class);
 
-         $user = User::factory()->create([
-            'name'     => 'Demo User',
-            'email'    => 'demo@freelanceflow.test',
-            'password' => bcrypt('password'),
+        $user = User::updateOrCreate([
+            'email' => 'demo@freelanceflow.test',
+        ], [
+            'name' => 'Demo User',
+            'password' => Hash::make('password'),
         ]);
 
-        // Create a default workspace for the demo user
-        $workspace = Workspace::create([
-            'name'     => 'Demo Agency',
-            'slug'     => 'demo-agency',
+        $user->assignRole('admin');
+
+        $workspace = Workspace::updateOrCreate([
+            'slug' => 'demo-agency',
+        ], [
+            'name' => 'Demo Agency',
             'owner_id' => $user->id,
-            'plan'     => 'pro',
+            'plan' => 'pro',
         ]);
 
-        // Attach user as owner
-        $workspace->users()->attach($user->id, ['role' => 'owner']);
+        $workspace->users()->syncWithoutDetaching([
+            $user->id => ['role' => 'owner'],
+        ]);
 
-         $this->call([
-            RoleAndPermissionSeeder::class,
+        session(['current_workspace_id' => $workspace->id]);
+
+        $this->resetDemoWorkspaceData($workspace);
+
+        $this->call([
             ClientSeeder::class,
-            TagSeeder::class
-            // ProjectSeeder::class,   - we add these in Phase 2
-            // InvoiceSeeder::class,
+            TagSeeder::class,
+            InvoiceSeeder::class,
+            AttachmentSeeder::class,
         ]);
+    }
+
+    private function resetDemoWorkspaceData(Workspace $workspace): void
+    {
+        $projectIds = Project::withoutGlobalScopes()
+            ->where('workspace_id', $workspace->id)
+            ->pluck('id');
+
+        DB::table('attachments')->whereIn('project_id', $projectIds)->delete();
+        DB::table('project_tag')->whereIn('project_id', $projectIds)->delete();
+        DB::table('invoices')->where('workspace_id', $workspace->id)->delete();
+        DB::table('projects')->where('workspace_id', $workspace->id)->delete();
+        DB::table('clients')->where('workspace_id', $workspace->id)->delete();
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProjectAnalyticsController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Middleware\EnsureTwoFactorAuthenticated;
@@ -90,6 +91,7 @@ Route::middleware(['auth', EnsureTwoFactorAuthenticated::class])->group(function
     // Projects
     Route::get('/projects/create', CreateProject::class)->name('projects.create');
     Route::get('/projects/{project}/edit', EditProject::class)->name('projects.edit');
+    Route::get('/projects/{project}/analytics', [ProjectAnalyticsController::class, 'show'])->name('projects.analytics');
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
     // Invoices

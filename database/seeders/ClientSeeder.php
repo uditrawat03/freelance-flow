@@ -5,55 +5,72 @@ namespace Database\Seeders;
 use App\Models\Client;
 use App\Models\Project;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Workspace;
 use Illuminate\Database\Seeder;
 
 class ClientSeeder extends Seeder
 {
     public function run(): void
     {
-        // Wipe existing clients before seeding
-        Client::truncate();
+        $user = User::where('email', 'demo@freelanceflow.test')->firstOrFail();
+        $workspace = Workspace::where('slug', 'demo-agency')->firstOrFail();
 
-        $user = User::first();
+        $featuredClients = collect([
+            ['name' => 'Aarav Mehta', 'email' => 'aarav@northstar-retail.test', 'company' => 'Northstar Retail', 'status' => 'active', 'phone' => '+91 98765 10001'],
+            ['name' => 'Maya Iyer', 'email' => 'maya@bluepeak-studio.test', 'company' => 'Bluepeak Studio', 'status' => 'active', 'phone' => '+91 98765 10002'],
+            ['name' => 'Rohan Shah', 'email' => 'rohan@finwise-labs.test', 'company' => 'Finwise Labs', 'status' => 'active', 'phone' => '+91 98765 10003'],
+            ['name' => 'Neha Kapoor', 'email' => 'neha@greenleaf-cafe.test', 'company' => 'Greenleaf Cafe', 'status' => 'active', 'phone' => '+91 98765 10004'],
+            ['name' => 'Vikram Rao', 'email' => 'vikram@orbit-legal.test', 'company' => 'Orbit Legal', 'status' => 'inactive', 'phone' => '+91 98765 10005'],
+            ['name' => 'Sara Thomas', 'email' => 'sara@craftlane.test', 'company' => 'Craftlane', 'status' => 'lead', 'phone' => '+91 98765 10006'],
+        ])->map(fn (array $client) => Client::factory()->create([
+            ...$client,
+            'notes' => 'Seeded demo client with realistic project and invoice history.',
+            'user_id' => $user->id,
+            'workspace_id' => $workspace->id,
+        ]));
 
-        $workspace = $user->currentWorkspace();
-
-        $activeClients = Client::factory()->count(30)->active()->create([
+        $activeClients = Client::factory()->count(24)->active()->create([
             'user_id' => $user->id,
             'workspace_id' => $workspace->id,
         ]);
-        $inactiveClients = Client::factory()->count(10)->inactive()->create([
-            'user_id' => $user->id,
-            'workspace_id' => $workspace->id,
-        ]);
-        
-        $leadClients = Client::factory()->count(10)->lead()->create([
+
+        $inactiveClients = Client::factory()->count(8)->inactive()->create([
             'user_id' => $user->id,
             'workspace_id' => $workspace->id,
         ]);
 
-         // Seed projects for active clients only
-        // Each active client gets 1–4 projects
-        $activeClients->each(function (Client $client) use ($user, $workspace) {
-            $count = fake()->numberBetween(1, 4);
-            Project::factory()->count($count)->create([
+        $leadClients = Client::factory()->count(12)->lead()->create([
+            'user_id' => $user->id,
+            'workspace_id' => $workspace->id,
+        ]);
+
+        $featuredClients->merge($activeClients)->each(function (Client $client) use ($user, $workspace): void {
+            Project::factory()->count(fake()->numberBetween(2, 5))->create([
                 'client_id' => $client->id,
                 'user_id' => $user->id,
                 'workspace_id' => $workspace->id,
             ]);
         });
 
-        // A few completed projects for some inactive clients
-        $inactiveClients->take(5)->each(function (Client $client) use ($user, $workspace) {
-            Project::factory()->count(2)->completed()->create([
+        $inactiveClients->each(function (Client $client) use ($user, $workspace): void {
+            Project::factory()->count(fake()->numberBetween(1, 3))->completed()->create([
                 'client_id' => $client->id,
                 'user_id' => $user->id,
                 'workspace_id' => $workspace->id,
             ]);
         });
 
+        $leadClients->take(6)->each(function (Client $client) use ($user, $workspace): void {
+            Project::factory()->count(1)->create([
+                'client_id' => $client->id,
+                'user_id' => $user->id,
+                'workspace_id' => $workspace->id,
+                'status' => 'draft',
+                'budget' => fake()->randomFloat(2, 15000, 90000),
+                'deadline' => now()->addDays(fake()->numberBetween(30, 120)),
+            ]);
+        });
 
-        $this->command->info('✓ Seeded 50 clients and ~90 projects');
+        $this->command->info('Seeded demo clients and project pipeline.');
     }
 }

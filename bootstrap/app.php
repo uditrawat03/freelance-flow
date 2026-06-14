@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->appendToGroup('web', [
+            \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\SetUserLocale::class,
             \App\Http\Middleware\EnsureWorkspaceSelected::class,
         ]);

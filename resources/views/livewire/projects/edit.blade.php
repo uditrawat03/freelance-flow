@@ -1,8 +1,13 @@
 <div>
     <x-page-header title="Edit Project" subtitle="Update {{ $project->name }}.">
-        <a href="{{ route('clients.show', $project->client_id) }}" class="text-sm font-semibold text-muted hover:text-primary">
-            &larr; Back to client
-        </a>
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('projects.analytics', $project) }}" class="text-sm font-semibold text-primary hover:text-primary-hover">
+                View analytics
+            </a>
+            <a href="{{ route('clients.show', $project->client_id) }}" class="text-sm font-semibold text-muted hover:text-primary">
+                &larr; Back to client
+            </a>
+        </div>
     </x-page-header>
 
     <x-form-card max-width="max-w-5xl">
