@@ -5,6 +5,7 @@ namespace App\Livewire\Invoices;
 use App\Models\Invoice;
 use App\Services\InvoiceService;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -20,11 +21,20 @@ class InvoiceList extends Component
     public string $status = '';
 
     public bool $confirmingDelete = false;
+
     public ?int $deletingInvoiceId = null;
+
     public bool $confirmingGenerate = false;
+
     public ?int $generatingInvoiceId = null;
 
     public function updatedStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    #[On('invoice-created')]
+    public function refreshList(): void
     {
         $this->resetPage();
     }
@@ -85,13 +95,9 @@ class InvoiceList extends Component
         session()->flash('success', __('app.invoices.deleted'));
     }
 
-    public function render()
+    public function render(InvoiceService $invoiceService)
     {
-        $invoices = Invoice::query()
-            ->with('client')
-            ->when($this->status, fn($q) => $q->where('status', $this->status))
-            ->latest()
-            ->paginate(15);
+        $invoices = $invoiceService->list($this->status, 15);
 
         return view('livewire.invoices.invoice-list', compact('invoices'));
     }

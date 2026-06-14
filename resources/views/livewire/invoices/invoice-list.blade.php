@@ -1,9 +1,12 @@
 <div>
     <x-page-header title="Invoices" subtitle="Manage your invoices and track payments.">
-        <a href="{{ route('invoices.create') }}"
-            class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
-            + New invoice
-        </a>
+        <div class="flex flex-wrap items-center gap-2">
+            <livewire:invoices.quick-create />
+            <a href="{{ route('invoices.create') }}" wire:navigate
+                class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                + New invoice
+            </a>
+        </div>
     </x-page-header>
 
     {{-- Status filter pills --}}
@@ -64,7 +67,7 @@
                         <div>
                             <p class="text-xs text-gray-500">Dates</p>
                             <p class="text-sm text-gray-700">
-                                {{ $invoice->issued_at?->format('M d') ?? 'N/A' }} → {{ $invoice->due_at?->format('M d') ?? 'N/A' }}
+                                {{ $invoice->issued_at?->format('M d') ?? 'N/A' }} to {{ $invoice->due_at?->format('M d') ?? 'N/A' }}
                             </p>
                         </div>
                     </div>

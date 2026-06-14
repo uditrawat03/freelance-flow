@@ -5,16 +5,16 @@ namespace App\Services;
 use App\Models\Client;
 use App\Repositories\Contracts\ClientRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class ClientService
 {
     public function __construct(
         private readonly ClientRepositoryInterface $clients,
-    ) {
-    }
+    ) {}
 
-    private function workspaceId(): int|null
+    private function workspaceId(): ?int
     {
         return auth()->user()->currentWorkspace()?->id;
     }
@@ -31,6 +31,7 @@ class ClientService
     {
         $client = $this->clients->create($data);
         $this->bustCache();
+
         return $client;
     }
 
@@ -38,6 +39,7 @@ class ClientService
     {
         $updated = $this->clients->update($client, $data);
         $this->bustCache();
+
         return $updated;
     }
 
@@ -57,6 +59,11 @@ class ClientService
         ])->remember("client_stats_{$workspaceId}", 300, function () {
             return $this->clients->countByStatus();
         });
+    }
+
+    public function activeClients(): Collection
+    {
+        return $this->clients->activeClients();
     }
 
     public function bustCache(): void

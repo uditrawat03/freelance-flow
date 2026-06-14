@@ -1,8 +1,9 @@
 <div>
+    <livewire:clients.stats />
 
     {{-- Page header --}}
     <x-page-header title="Clients" subtitle="Manage and track all your client relationships.">
-        <a href="{{ route('clients.create') }}"
+        <a href="{{ route('clients.create') }}" wire:navigate
             class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
             + New client
         </a>
@@ -62,7 +63,7 @@
     </div>
 
     {{-- Loading indicator --}}
-    <div wire:loading.delay class="text-center py-4">
+    <div wire:loading.delay.long wire:target="search,status,setStatus,clearSearch" class="text-center py-4">
         <div class="inline-flex items-center gap-2 text-sm text-gray-500">
             <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -72,7 +73,7 @@
     </div>
 
     {{-- Client list --}}
-    <div wire:loading.class="opacity-50" class="space-y-3">
+    <div wire:loading.class="opacity-50" wire:target="search,status,setStatus,clearSearch" class="space-y-3">
 
         @forelse ($clients as $client)
             <x-card class="flex items-center justify-between hover:shadow-md transition-shadow group">
@@ -84,7 +85,7 @@
                     </div>
 
                     <div class="flex-1 min-w-0">
-                        <a href="{{ route('clients.show', $client) }}"
+                        <a href="{{ route('clients.show', $client) }}" wire:navigate
                             class="font-semibold text-gray-900 text-sm hover:text-indigo-600 transition-colors block">
                             {{ $client->display_name }}
                         </a>
@@ -101,7 +102,7 @@
                 <div class="flex items-center gap-4 flex-shrink-0 ml-4">
                     <x-client-status :status="$client->status" />
                     @can('update', $client)
-                        <a href="{{ route('clients.edit', $client) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors">
+                        <a href="{{ route('clients.edit', $client) }}" wire:navigate class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors">
                             Edit
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.658 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />

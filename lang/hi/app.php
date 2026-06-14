@@ -31,6 +31,7 @@ return [
     ],
 
     'invoices' => [
+        'saved' => 'Invoice :number created.',
         'pdf_generated' => 'इनवॉइस :number के लिए PDF बनाया गया।',
         'marked_sent' => 'इनवॉइस :number भेजा हुआ चिह्नित किया गया।',
         'marked_paid' => 'इनवॉइस :number भुगतान किया हुआ चिह्नित किया गया।',

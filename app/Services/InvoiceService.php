@@ -5,28 +5,35 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-
+use Illuminate\Support\Facades\Storage;
 
 class InvoiceService
 {
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoices,
-    ) {
-    }
+    ) {}
 
     public function create(array $data): Invoice
     {
-        $invoice =  $this->invoices->create($data);
+        $invoice = $this->invoices->create($data);
         $this->bustCache();
+
         return $invoice;
+    }
+
+    public function list(string $status = '', int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->invoices->paginate($status, $perPage);
     }
 
     public function update(Invoice $invoice, array $data): Invoice
     {
         $updated = $this->invoices->update($invoice, $data);
         $this->bustCache();
+
         return $updated;
     }
 
@@ -59,7 +66,7 @@ class InvoiceService
 
     public function getPdfContent(Invoice $invoice): string
     {
-        if (!$invoice->has_pdf) {
+        if (! $invoice->has_pdf) {
             $this->generatePdf($invoice);
         }
 
@@ -84,12 +91,12 @@ class InvoiceService
         return $this->invoices->revenueByMonth($months);
     }
 
-    public function overdueInvoices(): \Illuminate\Support\Collection
+    public function overdueInvoices(): Collection
     {
         return $this->invoices->overdueInvoices();
     }
 
-    private function workspaceId(): int|null
+    private function workspaceId(): ?int
     {
         return auth()->user()->currentWorkspace()?->id;
     }
@@ -102,5 +109,4 @@ class InvoiceService
             "workspace:{$this->workspaceId()}",
         ])->flush();
     }
-
 }

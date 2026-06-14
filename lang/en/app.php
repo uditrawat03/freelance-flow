@@ -31,6 +31,7 @@ return [
     ],
 
     'invoices' => [
+        'saved' => 'Invoice :number created.',
         'pdf_generated' => 'PDF generated for invoice :number.',
         'marked_sent' => 'Invoice :number marked as sent.',
         'marked_paid' => 'Invoice :number marked as paid.',
