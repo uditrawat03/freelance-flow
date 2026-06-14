@@ -6,15 +6,20 @@ use App\Events\ProjectCreated;
 use App\Jobs\SendProjectNotification as SendProjectNotificationJob;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 
 class SendProjectNotification implements ShouldQueue
 {
     use InteractsWithQueue;
 
     // Queue configuration for this listener
-    public int $tries   = 3;
+    public int $tries = 3;
+
     public int $backoff = 60;
+
     public int $timeout = 30;
+
+    public string $queue = 'emails';
 
     public function handle(ProjectCreated $event): void
     {
@@ -35,9 +40,9 @@ class SendProjectNotification implements ShouldQueue
 
     public function failed(ProjectCreated $event, \Throwable $exception): void
     {
-        \Illuminate\Support\Facades\Log::error('SendProjectNotification listener failed', [
+        Log::error('SendProjectNotification listener failed', [
             'project_id' => $event->project->id,
-            'error'      => $exception->getMessage(),
+            'error' => $exception->getMessage(),
         ]);
     }
 }

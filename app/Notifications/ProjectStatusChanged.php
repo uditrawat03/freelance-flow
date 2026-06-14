@@ -7,18 +7,21 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class ProjectStatusChanged extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public int $tries = 3;
+
     public int $backoff = 60;
 
     public function __construct(
         public readonly Project $project,
         public readonly string $previousStatus,
     ) {
+        $this->onQueue('notifications');
     }
 
     // Which channels to deliver through
@@ -50,7 +53,7 @@ class ProjectStatusChanged extends Notification implements ShouldQueue
             ->subject("Project update: {$this->project->name}")
             ->greeting("Hi {$notifiable->name},")
             ->line("The status of **{$this->project->name}** has been updated.")
-            ->line("**Previous status:** " . ucfirst(str_replace('_', ' ', $this->previousStatus)))
+            ->line('**Previous status:** '.ucfirst(str_replace('_', ' ', $this->previousStatus)))
             ->line("**New status:** {$this->project->status_label}")
             ->action('View Project', route('clients.show', $this->project->client_id))
             ->line('You are receiving this because you manage this project on FreelanceFlow.');
@@ -59,7 +62,7 @@ class ProjectStatusChanged extends Notification implements ShouldQueue
     // Called if all retries fail
     public function failed(\Throwable $exception): void
     {
-        \Illuminate\Support\Facades\Log::error('ProjectStatusChanged notification failed', [
+        Log::error('ProjectStatusChanged notification failed', [
             'project_id' => $this->project->id,
             'error' => $exception->getMessage(),
         ]);

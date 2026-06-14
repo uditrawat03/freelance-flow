@@ -1,13 +1,15 @@
 <?php
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
+use Laravel\Horizon\Contracts\MasterSupervisorRepository;
 
 // Check overdue invoices every morning at 7am
 Schedule::command('invoice:check-overdue')
     ->dailyAt('07:00')
     ->withoutOverlapping()
     ->onFailure(function () {
-        \Illuminate\Support\Facades\Log::error('invoice:check-overdue scheduler failed');
+        Log::error('invoice:check-overdue scheduler failed');
     })
     ->emailOutputOnFailure(config('mail.from.address'));
 
@@ -45,3 +47,26 @@ Schedule::command('cache:warm')
 // Prune stale queue jobs older than 48 hours
 Schedule::command('queue:prune-failed --hours=48')
     ->daily();
+
+Schedule::command('horizon:snapshot')
+    ->everyFiveMinutes()
+    ->when(fn () => app()->bound('horizon'))
+    ->withoutOverlapping();
+
+Schedule::call(function () {
+    if (! interface_exists(MasterSupervisorRepository::class)) {
+        return;
+    }
+
+    $masters = app(MasterSupervisorRepository::class)->all();
+
+    if (empty($masters)) {
+        Log::critical('Horizon is not running.', [
+            'checked_at' => now()->toIso8601String(),
+        ]);
+    }
+})
+    ->name('horizon-health-check')
+    ->everyFiveMinutes()
+    ->when(fn () => app()->environment('production'))
+    ->withoutOverlapping();

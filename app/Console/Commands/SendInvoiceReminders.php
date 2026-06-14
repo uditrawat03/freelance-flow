@@ -30,6 +30,7 @@ class SendInvoiceReminders extends Command
 
         if ($invoices->isEmpty()) {
             $this->info('No invoices need reminders today.');
+
             return self::SUCCESS;
         }
 
@@ -37,14 +38,15 @@ class SendInvoiceReminders extends Command
 
         foreach ($invoices as $invoice) {
             if ($this->option('dry-run')) {
-                $this->line("  Would remind: {$invoice->number} → {$invoice->client->email} (due {$invoice->due_at->format('M d')})");
+                $this->line("  Would remind: {$invoice->number} -> {$invoice->client->email} (due {$invoice->due_at->format('M d')})");
+
                 continue;
             }
 
             Mail::to($invoice->client->email)
                 ->queue(new InvoicePaymentReminder($invoice));
 
-            $this->line("  ✓ Reminder queued for {$invoice->number}");
+            $this->line("  OK Reminder queued for {$invoice->number}");
         }
 
         return self::SUCCESS;

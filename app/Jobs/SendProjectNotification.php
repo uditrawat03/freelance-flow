@@ -10,8 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SendProjectNotification implements ShouldQueue
 {
@@ -28,16 +28,27 @@ class SendProjectNotification implements ShouldQueue
 
     public function __construct(
         public readonly Project $project,
-    ) {}
+    ) {
+        $this->onQueue('emails');
+    }
 
     public function handle(Logger $logger): void
     {
         $this->project->loadMissing('client');
 
         if (! $this->project->client?->email) {
-            $logger->warning('SendProjectNotification skipped — client has no email', [
+            $logger->warning('SendProjectNotification skipped: client has no email', [
                 'project_id' => $this->project->id,
             ]);
+
+            return;
+        }
+
+        if ($this->project->trashed()) {
+            $logger->info('SendProjectNotification skipped: project was deleted', [
+                'project_id' => $this->project->id,
+            ]);
+
             return;
         }
 
@@ -46,7 +57,7 @@ class SendProjectNotification implements ShouldQueue
 
         $logger->info('Project notification sent', [
             'project_id' => $this->project->id,
-            'to'         => $this->project->client->email,
+            'to' => $this->project->client->email,
         ]);
     }
 
@@ -55,8 +66,8 @@ class SendProjectNotification implements ShouldQueue
     {
         Log::error('SendProjectNotification failed permanently', [
             'project_id' => $this->project->id,
-            'error'      => $exception->getMessage(),
-            'trace'      => $exception->getTraceAsString(),
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
         ]);
 
         // Optionally notify the FreelanceFlow team via a different channel

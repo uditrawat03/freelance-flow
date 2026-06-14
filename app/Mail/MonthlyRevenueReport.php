@@ -16,14 +16,16 @@ class MonthlyRevenueReport extends Mailable
 
     public function __construct(
         public readonly Workspace $workspace,
-        public readonly array     $report,
-        public readonly Carbon    $month,
-    ) {}
+        public readonly array $report,
+        public readonly Carbon $month,
+    ) {
+        $this->onQueue('emails');
+    }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Monthly Revenue Report — {$this->month->format('F Y')} — {$this->workspace->name}",
+            subject: "Monthly Revenue Report - {$this->month->format('F Y')} - {$this->workspace->name}",
         );
     }
 
@@ -33,8 +35,8 @@ class MonthlyRevenueReport extends Mailable
             markdown: 'emails.reports.monthly-revenue',
             with: [
                 'workspace' => $this->workspace,
-                'report'    => $this->report,
-                'month'     => $this->month,
+                'report' => $this->report,
+                'month' => $this->month,
             ],
         );
     }

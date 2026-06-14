@@ -16,6 +16,7 @@ class InvoicePaymentReminder extends Mailable
     public function __construct(
         public readonly Invoice $invoice,
     ) {
+        $this->onQueue('emails');
     }
 
     public function envelope(): Envelope

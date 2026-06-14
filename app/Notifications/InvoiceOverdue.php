@@ -12,9 +12,14 @@ class InvoiceOverdue extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public int $tries = 3;
+
+    public int $backoff = 60;
+
     public function __construct(
         public readonly Invoice $invoice,
     ) {
+        $this->onQueue('notifications');
     }
 
     public function via(object $notifiable): array

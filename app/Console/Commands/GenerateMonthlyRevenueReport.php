@@ -2,10 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\MonthlyRevenueReport;
 use App\Models\Invoice;
 use App\Models\Workspace;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class GenerateMonthlyRevenueReport extends Command
 {
@@ -36,15 +38,15 @@ class GenerateMonthlyRevenueReport extends Command
             $report = $this->buildReport($workspace, $targetDate);
 
             $this->line("  Workspace: {$workspace->name}");
-            $this->line("    Revenue:  ₹" . number_format($report['total_revenue'], 2));
+            $this->line('    Revenue:  '.config('freelanceflow.invoice.currency_symbol', 'Rs.').number_format($report['total_revenue'], 2));
             $this->line("    Invoices: {$report['invoices_paid']} paid, {$report['invoices_outstanding']} outstanding");
 
             // Email the report to the workspace owner
             if ($workspace->owner?->email) {
-                \Illuminate\Support\Facades\Mail::to($workspace->owner->email)
-                    ->queue(new \App\Mail\MonthlyRevenueReport($workspace, $report, $targetDate));
+                Mail::to($workspace->owner->email)
+                    ->queue(new MonthlyRevenueReport($workspace, $report, $targetDate));
 
-                $this->line("    ✓ Report emailed to {$workspace->owner->email}");
+                $this->line("    OK Report emailed to {$workspace->owner->email}");
             }
         }
 
@@ -71,7 +73,7 @@ class GenerateMonthlyRevenueReport extends Command
             'invoices_outstanding' => $outstanding->count(),
             'outstanding_amount' => $outstanding->sum('total'),
             'top_clients' => $paid->groupBy('client_id')
-                ->map(fn($inv) => $inv->sum('total'))
+                ->map(fn ($inv) => $inv->sum('total'))
                 ->sortDesc()
                 ->take(5)
                 ->toArray(),

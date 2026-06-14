@@ -15,7 +15,9 @@ class ProjectCreated extends Mailable
 
     public function __construct(
         public readonly Project $project,
-    ) {}
+    ) {
+        $this->onQueue('emails');
+    }
 
     public function envelope(): Envelope
     {
@@ -29,8 +31,8 @@ class ProjectCreated extends Mailable
         return new Content(
             markdown: 'emails.projects.created',
             with: [
-                'project'    => $this->project,
-                'client'     => $this->project->client,
+                'project' => $this->project,
+                'client' => $this->project->client,
                 'projectUrl' => route('clients.show', $this->project->client_id),
             ],
         );
