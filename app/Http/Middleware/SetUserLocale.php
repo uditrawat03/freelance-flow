@@ -11,11 +11,17 @@ class SetUserLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = $request->user()?->getLocale() ?? config('app.locale', 'en');
+        $defaultLocale = config('app.locale', 'en');
+        $locale = $request->user()?->getLocale() ?? $defaultLocale;
 
         app()->setLocale($locale);
         Carbon::setLocale($locale);
 
-        return $next($request);
+        try {
+            return $next($request);
+        } finally {
+            app()->setLocale($defaultLocale);
+            Carbon::setLocale($defaultLocale);
+        }
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\Octane\StartCommand;
+use App\Console\Commands\Octane\StartFrankenPhpCommand;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Project;
@@ -28,6 +30,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Dusk\Dusk;
 use Laravel\Horizon\Horizon;
+use Laravel\Octane\Commands\StartCommand as OctaneStartCommand;
+use Laravel\Octane\Commands\StartFrankenPhpCommand as OctaneStartFrankenPhpCommand;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,12 +46,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProjectRepositoryInterface::class, EloquentProjectRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, EloquentInvoiceRepository::class);
 
-        // Services: singletons as before.
-        $this->app->singleton(ClientService::class);
-        $this->app->singleton(ProjectService::class);
-        $this->app->singleton(InvoiceService::class);
-        $this->app->singleton(DashboardService::class);
-        $this->app->singleton(Logger::class);
+        // Request-aware services are scoped so Octane workers never reuse
+        // resolved instances across requests.
+        $this->app->scoped(ClientService::class);
+        $this->app->scoped(ProjectService::class);
+        $this->app->scoped(InvoiceService::class);
+        $this->app->scoped(DashboardService::class);
+        $this->app->scoped(Logger::class);
+
+        if (! function_exists('pcntl_signal')) {
+            $this->app->bind(OctaneStartCommand::class, StartCommand::class);
+            $this->app->bind(OctaneStartFrankenPhpCommand::class, StartFrankenPhpCommand::class);
+        }
 
         if ($this->app->isLocal() && class_exists(TelescopeApplicationServiceProvider::class)) {
             $this->app->register(TelescopeServiceProvider::class);
