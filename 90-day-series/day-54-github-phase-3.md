@@ -38,16 +38,16 @@ Regression coverage was added to `tests/Feature/HorizonConfigurationTest.php` so
 | 39 | Cache strategies | `WarmCache`, `RefreshDashboardCache`, cache TTL config |
 | 40 | Reverb real-time events | `ProjectStatusUpdated`, `DashboardStatsUpdated`, `routes/channels.php` |
 | 41-44 | Automated testing | feature tests, browser tests, factories, helpers |
-| 45 | Rate limiting | named limiters, API throttles, login brute-force protection |
-| 46 | Encryption and hashing | encrypted casts, `SensitiveString`, log sanitization |
-| 47 | Two-factor authentication | TOTP, recovery codes, 2FA challenge middleware |
-| 48 | Horizon | four queue lanes, autoscaling supervisors, queue tests |
-| 49 | Telescope | tuned watchers, low queue ingestion, sensitive-data filtering |
-| 50 | Localization | English and Hindi translations, locale middleware, settings switcher |
-| 51 | Advanced Livewire | `wire:navigate`, lazy components, optimistic UI, `$wire` bridge |
-| 52 | Inertia.js | Vue analytics page, shared layout, controller payloads |
-| 53 | GraphQL with Lighthouse | schema, resolvers, Sanctum login mutation, validation |
-| 54 | Octane and Phase 3 review | FrankenPHP, Octane-safe services, release audit |
+| 45 | Encryption and hashing | encrypted casts, `SensitiveString`, log sanitization |
+| 46 | Two-factor authentication | TOTP, recovery codes, 2FA challenge middleware |
+| 47 | Horizon | four queue lanes, autoscaling supervisors, queue tests |
+| 48 | Telescope | tuned watchers, low queue ingestion, sensitive-data filtering |
+| 49 | Localization | English and Hindi translations, locale middleware, settings switcher |
+| 50 | Advanced Livewire | `wire:navigate`, lazy components, optimistic UI, `$wire` bridge |
+| 51 | Inertia.js | Vue analytics page, shared layout, controller payloads |
+| 52 | GraphQL with Lighthouse | schema, resolvers, Sanctum login mutation, validation |
+| 53 | Octane | FrankenPHP, Octane-safe services, hot workers |
+| 54 | Phase 3 review | scalability audit, release checklist, changelog |
 
 ---
 
@@ -322,7 +322,6 @@ Add this to `CHANGELOG.md`:
 - Four-lane queue strategy: default, emails, notifications, and low.
 - Dedicated Horizon supervisors with autoscaling knobs for each queue lane.
 - Real-time WebSocket events through Laravel Reverb.
-- Full-text search with Laravel Scout and Meilisearch.
 - Rate limiting for login, API access, token creation, payment pages, and expensive actions.
 - Encryption at rest for sensitive notes.
 - Two-factor authentication with TOTP and recovery codes.

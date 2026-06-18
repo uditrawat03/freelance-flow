@@ -58,7 +58,7 @@ In production you run `php artisan config:cache` which serialises every config f
 Search the FreelanceFlow codebase for any direct `env()` calls outside of `config/` directories:
 
 ```bash
-grep -r "env(" app/ --include="*.php" | grep -v "config(" | grep "env("
+rg -n "env\(" app routes database
 ```
 
 Fix every result by moving the value into a config file and reading it with `config()`.

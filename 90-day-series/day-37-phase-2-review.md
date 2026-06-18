@@ -47,16 +47,11 @@ Work through each section methodically. Fix issues as you find them.
 
 ```bash
 # Find any leftover debug calls
-grep -r "dd(" app/ --include="*.php"
-grep -r "dump(" app/ --include="*.php"
-grep -r "var_dump(" app/ --include="*.php"
-grep -r "ray(" app/ --include="*.php"
-grep -r "ddd(" app/ --include="*.php"
-grep -r "console.log" resources/ --include="*.js"
-grep -r "console.log" resources/ --include="*.blade.php"
+rg -n "dd\(|dump\(|var_dump\(|ray\(|ddd\(" app
+rg -n "console\.log" resources/js resources/views
 ```
 
-Each grep should return nothing. If any match is found — remove it before continuing.
+Each search should return nothing. If any match is found — remove it before continuing.
 
 ---
 
@@ -64,9 +59,7 @@ Each grep should return nothing. If any match is found — remove it before cont
 
 ```bash
 # Find direct env() calls outside the config directory
-grep -rn "env(" app/ --include="*.php"
-grep -rn "env(" routes/ --include="*.php"
-grep -rn "env(" database/ --include="*.php"
+rg -n "env\(" app routes database
 ```
 
 Every result is a potential production bug when `config:cache` runs. Move each value into `config/freelanceflow.php` or the appropriate existing config file and replace the `env()` call with `config()`.
@@ -323,7 +316,7 @@ php artisan invoice:check-overdue --dry-run
 
 ```bash
 # Start the server
-php artisan serve &
+php artisan serve
 
 # Get a token
 TOKEN=$(curl -s -X POST http://localhost:8000/api/v1/tokens/create \
@@ -446,7 +439,7 @@ From Day 38 we enter Phase 3. The complexity increases significantly — Redis c
 | 45–46 | Feature testing — PHPUnit, RefreshDatabase, HTTP tests |
 | 47–48 | HTTP tests and mocking — actingAs, Mail::fake(), Queue::fake() |
 | 49 | Browser testing with Dusk |
-| 50–51 | Full-text search with Scout and Meilisearch |
+| 50-51 | Advanced Livewire and Inertia analytics |
 | 52 | Rate limiting deep dive |
 | 53 | Encryption and hashing |
 | 54 | Two-factor authentication |
@@ -456,7 +449,7 @@ From Day 38 we enter Phase 3. The complexity increases significantly — Redis c
 | 59–60 | Livewire advanced patterns |
 | 61 | Inertia.js introduction |
 | 62 | GraphQL with Lighthouse |
-| 63 | Octane with FrankenPHP |
+| 53 | Octane with FrankenPHP |
 | 64 | Phase 3 review |
 
 The patterns you learned in Phase 2 — services, repositories, events, policies, queues — all appear again in Phase 3. The new concepts build on the foundation rather than replacing it.

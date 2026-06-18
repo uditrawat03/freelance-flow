@@ -65,12 +65,8 @@ Search the entire codebase for anything you added during development:
 
 ```bash
 # Search for leftover debug code
-grep -r "dd(" app/ --include="*.php"
-grep -r "dump(" app/ --include="*.php"
-grep -r "var_dump(" app/ --include="*.php"
-grep -r "ray(" app/ --include="*.php"
-grep -r "console.log" resources/ --include="*.js"
-grep -r "console.log" resources/ --include="*.vue"
+rg -n "dd\(|dump\(|var_dump\(|ray\(" app
+rg -n "console\.log" resources/js resources/views
 ```
 
 Each of those should return nothing. If they do — remove those lines before pushing.

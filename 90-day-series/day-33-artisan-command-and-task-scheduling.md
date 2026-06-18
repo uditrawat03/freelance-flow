@@ -601,7 +601,7 @@ class ArchiveStaleLeads extends Command
 
 ## Step 6 — Register Commands in the Scheduler
 
-In Laravel 11+ scheduling lives in `routes/console.php`:
+In the current Laravel application structure, scheduling lives in `routes/console.php`:
 
 ```php
 <?php
@@ -754,7 +754,7 @@ $this->argument('id');     // {id} argument
 - **`$signature` with options** — `{--dry-run}` for boolean flags, `{--days=3}` for options with defaults, `{id}` for required arguments
 - **`--dry-run` pattern** — always build a preview mode into destructive or batch commands before running for real
 - **`withoutOverlapping()`** — prevents a second instance from running if the first has not finished. Essential for commands that can be slow
-- **`routes/console.php`** — where all scheduled commands live in Laravel 11+. One file, all schedules visible at a glance
+- **`routes/console.php`** — where all scheduled commands live in this app. One file, all schedules visible at a glance
 - **Single cron entry** — one `* * * * * php artisan schedule:run` drives everything. Laravel's scheduler decides what runs when
 - **`schedule:work`** — runs the scheduler locally without a cron entry. Use this in development alongside `queue:work`
 - **`onFailure()`** — callback that runs if the command throws an exception. Use it to alert the team

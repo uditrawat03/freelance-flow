@@ -69,10 +69,10 @@ class ForceJsonResponse
 }
 ```
 
-Register it on all API routes in `bootstrap/app.php` (Laravel 11+) or `app/Http/Kernel.php` (Laravel 10):
+Register it on all API routes in `bootstrap/app.php` for the current Laravel application structure:
 
 ```php
-// bootstrap/app.php (Laravel 11+)
+// bootstrap/app.php
 ->withMiddleware(function (Middleware $middleware) {
     $middleware->api(prepend: [
         \App\Http\Middleware\ForceJsonResponse::class,

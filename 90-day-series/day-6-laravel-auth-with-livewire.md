@@ -42,7 +42,7 @@ Before we build anything, let us address the error many of you saw if you tried 
 Call to undefined method App\Http\Controllers\ClientController::middleware()
 ```
 
-That method was removed in Laravel 11. The correct pattern now is middleware on the route:
+That method was removed from modern Laravel application scaffolds. The correct pattern now is middleware on the route:
 
 ```php
 // ✓ routes/web.php — correct for current Laravel

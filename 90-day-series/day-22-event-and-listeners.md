@@ -214,7 +214,7 @@ class EventServiceProvider extends ServiceProvider
 
 Laravel reads the `$listen` array and wires everything up automatically. When `ProjectCreated` is fired, both listeners are called. The order matters — `LogProjectActivity` runs first, then `SendProjectNotification` is queued.
 
-> **Auto-discovery alternative:** In Laravel 11+, you can skip registering listeners manually by adding `#[ListensTo(ProjectCreated::class)]` directly on the listener class. The EventServiceProvider `$listen` array approach is shown here because it gives you a single place to see all event-listener mappings in the app — which is more readable as the app grows.
+> **Auto-discovery alternative:** In modern Laravel versions, you can skip registering listeners manually by using event discovery or listener attributes where available. The EventServiceProvider `$listen` array approach is shown here because it gives you a single place to see all event-listener mappings in the app — which is more readable as the app grows.
 
 ---
 
